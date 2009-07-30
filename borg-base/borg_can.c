@@ -1,7 +1,7 @@
-#include "can.h"
-#include "lap.h"
+#include "lib/can.h"
+#include "lib/lap.h"
 #include "borg_can.h"
-#include "spi.h"
+#include "lib/spi.h"
 #include "blinken.h"
 
 #include <avr/pgmspace.h>
