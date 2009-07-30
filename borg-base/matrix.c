@@ -6,9 +6,9 @@
  */
 
 #include <stdint.h> 
-#include "prng.h"
+#include "lib/prng.h"
 #include "pixel.h"
-#include "util.h"
+#include "lib/util.h"
 
 
 typedef struct{
