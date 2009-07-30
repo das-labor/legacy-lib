@@ -1,7 +1,7 @@
 
 //#include "prng.h"
 #include "pixel.h"
-#include "util.h"
+#include "lib/util.h"
 
 #ifdef AVR
 	#include <avr/io.h>
