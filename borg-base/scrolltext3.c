@@ -9,7 +9,7 @@
 #endif
 
 #include "pixel.h"
-#include "util.h"
+#include "lib/util.h"
 #include "font_arial8.h"
 #include "font_small6.h"
 //#include "font-v5.h"
