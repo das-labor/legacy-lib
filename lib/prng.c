@@ -19,7 +19,7 @@ static uint8_t i=0;
 
 #ifndef AVR
 uint8_t random8(void){
-	return ((uint8_t)random())
+	return ((uint8_t)random());
 }
 #else
 
