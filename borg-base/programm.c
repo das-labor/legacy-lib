@@ -1,4 +1,4 @@
-
+#include <stdint.h>
 //#include "prng.h"
 #include "pixel.h"
 #include "lib/util.h"
