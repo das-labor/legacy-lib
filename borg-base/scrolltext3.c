@@ -1,5 +1,5 @@
 #define SCROLLTEXT_C
-
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <setjmp.h>
