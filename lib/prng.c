@@ -6,14 +6,22 @@
  * 
  */
 
+#ifdef AVR
 #include "noekeon.h"
 #include "memxor.h"
+#endif
 #include <stdint.h>
 #include <string.h>
 
 static uint8_t random_state[16];
 static uint8_t random_key[16];
 static uint8_t i=0;
+
+#ifndef AVR
+uint8_t random8(void){
+	return ((uint8_t)random())
+}
+#else
 
 uint8_t random8(void){
 	static uint8_t sr[16];
@@ -27,7 +35,6 @@ uint8_t random8(void){
 	--i;
 	return sr[i];
 }
-
 void random_block(void* dest){
 	i=0;
 	noekeon_enc(random_state, random_key);
@@ -45,5 +52,5 @@ void random_seed(const void* buffer){
 void random_add(const void* buffer){
 	memxor(random_key, buffer, 16);
 }
-
+#endif
 
