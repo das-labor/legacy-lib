@@ -6,7 +6,10 @@
  *
  */
 
+
 #include <inttypes.h>
+
+
 
 
 /****************************************************************************
@@ -36,6 +39,8 @@ typedef struct{
 	unsigned char cmd; 
 	unsigned char data[7];	
 } pdo_message;
+
+
 
 /****************************************************************************
  * Known ports and services
@@ -78,9 +83,12 @@ typedef enum { FKT_MOOD_INFO=0x00, FKT_MOOD_GET=0x01, FKT_MOOD_SET=0x02, FKT_MOO
 #define SDO_TYPE_STRING_WO	 0x82
 
 
+
+
 /****************************************************************************
  * STUBS: LAP Core Services 
  */
+
 
 // send ping to dst
 void lap_ping( can_addr dst );
