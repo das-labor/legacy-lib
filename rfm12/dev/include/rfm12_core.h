@@ -146,6 +146,15 @@
 	#define PWRMGT_DEFAULT (RFM12_PWRMGT_DC | PWRMGMT_WKUP | PWRMGMT_LOW_BATT)
 #endif
 
+//define a default receive power management mode
+#if RFM12_TRANSMIT_ONLY
+	//the receiver is turned off by default in transmit only mode
+	#define PWRMGT_RECEIVE (RFM12_CMD_PWRMGT | PWRMGT_DEFAULT)
+#else
+	//the receiver is turned on by default in normal mode
+	#define PWRMGT_RECEIVE (RFM12_CMD_PWRMGT | PWRMGT_DEFAULT | RFM12_PWRMGT_ER)
+#endif
+
 //default channel free time, if not defined elsewhere
 #ifndef CHANNEL_FREE_TIME
 	#define CHANNEL_FREE_TIME 200

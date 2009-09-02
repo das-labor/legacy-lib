@@ -266,30 +266,20 @@ ISR(RFM12_INT_VECT, ISR_NOBLOCK)
 			//flag the buffer as free again
 			ctrl.txstate = STATUS_FREE;
 			
-			//if receive mode is not disabled (default)
-			#if !(RFM12_TRANSMIT_ONLY)
-				//wakeup timer feature				
-				#if RFM12_USE_WAKEUP_TIMER
-					//clear wakeup timer once
-					rfm12_data(ctrl.pwrmgt_shadow & ~RFM12_PWRMGT_EW);					
-					//write shadow register
-					ctrl.pwrmgt_shadow = (RFM12_CMD_PWRMGT | PWRMGT_DEFAULT | RFM12_PWRMGT_ER);							
-				#endif /* RFM12_USE_WAKEUP_TIMER */
+			//wakeup timer feature
+			#if RFM12_USE_WAKEUP_TIMER
+				//clear wakeup timer once
+				rfm12_data(ctrl.pwrmgt_shadow & ~RFM12_PWRMGT_EW);
+				//set shadow register to default receive state
+				//the define correctly handles the transmit only mode
+				ctrl.pwrmgt_shadow = (RFM12_CMD_PWRMGT | PWRMGT_RECEIVE);							
+			#endif /* RFM12_USE_WAKEUP_TIMER */
 				
-				//turn off the transmitter and enable receiver
-				rfm12_data(RFM12_CMD_PWRMGT | PWRMGT_DEFAULT | RFM12_PWRMGT_ER);
-			#else
-				//wakeup timer feature
-				#if RFM12_USE_WAKEUP_TIMER
-					//clear timer once
-					rfm12_data(ctrl.pwrmgt_shadow & ~RFM12_PWRMGT_EW);
-					//write shadow register
-					ctrl.pwrmgt_shadow = (RFM12_CMD_PWRMGT | PWRMGT_DEFAULT);
-				#endif /* RFM12_USE_WAKEUP_TIMER */	
-				
-				//turn off the transmitter only
-				rfm12_data(RFM12_CMD_PWRMGT | PWRMGT_DEFAULT);				
-			#endif /* !(RFM12_TRANSMIT_ONLY) */
+			//turn off the transmitter and enable receiver
+			//the receiver is not enabled in transmit only mode
+			//if the wakeup timer is used, this will re-enable the wakeup timer bit
+			//the magic is done via defines
+			rfm12_data(RFM12_CMD_PWRMGT | PWRMGT_RECEIVE);
 			
 			//load a dummy byte to clear int status
 			rfm12_data_inline( (RFM12_CMD_TX>>8), 0xaa);
@@ -581,20 +571,14 @@ void rfm12_init()
 	#endif /* RFM12_LOW_BATT_DETECTOR */
 	
 	//enable rf receiver chain, if receiving is not disabled (default)
-	#if !(RFM12_TRANSMIT_ONLY)
-		rfm12_data(RFM12_CMD_PWRMGT | PWRMGT_DEFAULT | RFM12_PWRMGT_ER);
-	#endif /* !(RFM12_TRANSMIT_ONLY) */
+	//the magic is done via defines
+	rfm12_data(RFM12_CMD_PWRMGT | PWRMGT_RECEIVE);
 	
 	//wakeup timer feature setup
 	#if RFM12_USE_WAKEUP_TIMER
-		//if receive mode is not disabled (default)
-		#if !(RFM12_TRANSMIT_ONLY)
-			//set power management shadow register to receiver chain enabled
-			ctrl.pwrmgt_shadow = (RFM12_CMD_PWRMGT | PWRMGT_DEFAULT | RFM12_PWRMGT_ER);			
-		#else
-			//set power management shadow register to power off
-			ctrl.pwrmgt_shadow = (RFM12_CMD_PWRMGT | PWRMGT_DEFAULT);
-		#endif /* !(RFM12_TRANSMIT_ONLY) */
+		//set power management shadow register to receiver chain enabled or disabled
+		//the define correctly handles the transmit only mode
+		ctrl.pwrmgt_shadow = (RFM12_CMD_PWRMGT | PWRMGT_RECEIVE);
 	#endif /* RFM12_USE_WAKEUP_TIMER */
 	
 	//raw receive mode feature initialization
