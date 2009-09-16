@@ -18,12 +18,24 @@
  * @author Peter Fuhrmann, Hans-Gert Dahmen, Soeren Heisrath
  */
 
+
+/** \file main.c
+ * \brief rfm12 Library main file
+ * \author Hans-Gert Dahmen, Peter Fuhrmann, Soeren Heisrath
+ * \version 0.9.0
+ * \date 08.09.09
+ *
+ * All core functionality is implemented within this file.
+ */
+ 
+
 /************************
  * standard includes
 */
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <string.h>
+
 
 /************************
  * library internal includes
@@ -43,16 +55,16 @@
  * library internal globals
 */
 
-//buffer and status for the message to be transmitted
+//! Buffer and status for packet transmission.
 rf_tx_buffer_t rf_tx_buffer;
 
 //if receive mode is not disabled (default)
 #if !(RFM12_TRANSMIT_ONLY)
-	//buffers for the message to be received
+	//! Buffers and status to receive packets.
 	rf_rx_buffer_t rf_rx_buffers[2];
 #endif /* RFM12_USE_WAKEUP_TIMER */
 
-//the control struct
+//! Global control and status.
 rfm12_control_t ctrl;
 
 
@@ -81,21 +93,24 @@ rfm12_control_t ctrl;
  * Begin of library
 */
 
-/*
-	interrupt handler for interrupts from rfm12
-	
-	The receiver will generate an interrupt request (IT) for the
-	microcontroller - by pulling the nIRQ pin low - on the following events:
 
-	* The TX register is ready to receive the next byte (RGIT)
-	* The FIFO has received the preprogrammed amount of bits (FFIT)
-	* Power-on reset (POR) *
-	* FIFO overflow (FFOV) / TX register underrun (RGUR) *
-	* Wake-up timer timeout (WKUP) *
-	* Negative pulse on the interrupt input pin nINT (EXT) *
-	* Supply voltage below the preprogrammed value is detected (LBD) *
-	*these shouldn't occur - we'll just ignore them. These flags are cleared
-	 by reading status.
+//! Interrupt handler to handle all transmit and receive data transfers to the rfm12.
+/** The receiver will generate an interrupt request (IT) for the
+* microcontroller - by pulling the nIRQ pin low - on the following events:
+*
+* The TX register is ready to receive the next byte (RGIT)
+* The FIFO has received the preprogrammed amount of bits (FFIT)
+* Power-on reset (POR) 
+* FIFO overflow (FFOV) / TX register underrun (RGUR) 
+* Wake-up timer timeout (WKUP) 
+* Negative pulse on the interrupt input pin nINT (EXT) 
+* Supply voltage below the preprogrammed value is detected (LBD) 
+* The rfm12 status register is read to determine which event has occured.
+* Reading the status register will clear the event flags.
+*
+* The interrupt handles the RGIT and FFIT events by default.
+* Upon specific configuration of the library the WKUP and LBD events
+* are handled additionally.
 */
 ISR(RFM12_INT_VECT, ISR_NOBLOCK)
 {
@@ -301,6 +316,16 @@ ISR(RFM12_INT_VECT, ISR_NOBLOCK)
 }
 
 
+//! The tick function implements collision avoidance and initiates transmissions.
+/** This function has to be called periodically.
+* It will read the rfm12 status register to check if a carrier is being received,
+* which would indicate activity on the chosen radio channel.
+* If there has been no activity for long enough, the channel is believed to be free.
+* When there is a packet waiting for transmission and the collision avoidance
+* algorithm indicates that the air is free, then the interrupt control variables are
+* setup for packet transmission and the rfm12 is switched to transmit mode.
+* This function also fills the rfm12 tx fifo with a preamble.
+*/
 void rfm12_tick()
 {	
 	//collision detection is enabled by default
@@ -420,12 +445,15 @@ void rfm12_tick()
 }
 
 
-/* @description ask the rfm12 to transmit a packet when possible (carrier sense)
- * the data should be written to the tx buffer first after asking if
- * it is empty.
- *
- * @return see rfm12.h for possible return values.
- */
+//! Enqueue an already buffered packet for transmission
+/** If there is no active transmission, the packet header is written to the
+* transmission control buffer and the packet will be enqueued for transmission.
+* This function is not responsible for buffering the actual packet data.
+* The data has to be copied into the transmit buffer beforehand,
+* which can be accomplished by the rfm12_tx() function.
+* Note that this function does not start the transmission, it merely enqueues the packet.
+* Transmissions are started by rfm12_tick().
+*/
 #if (RFM12_NORETURNS)
 void 
 #else
@@ -448,9 +476,16 @@ rfm12_start_tx(uint8_t type, uint8_t length)
 	return TXRETURN(RFM12_TX_ENQUEUED);
 }
 
-/* @description send data out
- * @return see rfm12.h for possible return values.
- */
+
+//! Copy a packet to the buffer and call rfm12_start_tx() to enqueue it for transmission.
+/** If there is no active transmission, the packet header is written to the
+* transmission control buffer and the packet will be enqueued for transmission.
+* This function is not responsible for buffering the actual packet data.
+* The data has to be copied into the transmit buffer beforehand,
+* which can be accomplished by the rfm12_tx() function.
+* Note that this function does not start the transmission, it merely enqueues the packet.
+* Transmissions are started by rfm12_tick().
+*/
 #if (RFM12_NORETURNS)
 void
 #else
