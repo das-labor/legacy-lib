@@ -19,7 +19,7 @@
  */
 
 
-/** \file main.c
+/** \file rfm12.c
  * \brief rfm12 Library main file
  * \author Hans-Gert Dahmen, Peter Fuhrmann, Soeren Heisrath
  * \version 0.9.0
@@ -97,14 +97,14 @@ rfm12_control_t ctrl;
 //! Interrupt handler to handle all transmit and receive data transfers to the rfm12.
 /** The receiver will generate an interrupt request (IT) for the
 * microcontroller - by pulling the nIRQ pin low - on the following events:
+* - The TX register is ready to receive the next byte (RGIT)
+* - The FIFO has received the preprogrammed amount of bits (FFIT)
+* - Power-on reset (POR) 
+* - FIFO overflow (FFOV) / TX register underrun (RGUR) 
+* - Wake-up timer timeout (WKUP) 
+* - Negative pulse on the interrupt input pin nINT (EXT) 
+* - Supply voltage below the preprogrammed value is detected (LBD) 
 *
-* The TX register is ready to receive the next byte (RGIT)
-* The FIFO has received the preprogrammed amount of bits (FFIT)
-* Power-on reset (POR) 
-* FIFO overflow (FFOV) / TX register underrun (RGUR) 
-* Wake-up timer timeout (WKUP) 
-* Negative pulse on the interrupt input pin nINT (EXT) 
-* Supply voltage below the preprogrammed value is detected (LBD) 
 * The rfm12 status register is read to determine which event has occured.
 * Reading the status register will clear the event flags.
 *
@@ -319,8 +319,9 @@ ISR(RFM12_INT_VECT, ISR_NOBLOCK)
 //! The tick function implements collision avoidance and initiates transmissions.
 /** This function has to be called periodically.
 * It will read the rfm12 status register to check if a carrier is being received,
-* which would indicate activity on the chosen radio channel.
+* which would indicate activity on the chosen radio channel. \n
 * If there has been no activity for long enough, the channel is believed to be free.
+*
 * When there is a packet waiting for transmission and the collision avoidance
 * algorithm indicates that the air is free, then the interrupt control variables are
 * setup for packet transmission and the rfm12 is switched to transmit mode.
@@ -447,10 +448,11 @@ void rfm12_tick()
 
 //! Enqueue an already buffered packet for transmission
 /** If there is no active transmission, the packet header is written to the
-* transmission control buffer and the packet will be enqueued for transmission.
+* transmission control buffer and the packet will be enqueued for transmission. \n
 * This function is not responsible for buffering the actual packet data.
 * The data has to be copied into the transmit buffer beforehand,
 * which can be accomplished by the rfm12_tx() function.
+*
 * Note that this function does not start the transmission, it merely enqueues the packet.
 * Transmissions are started by rfm12_tick().
 */
@@ -478,11 +480,12 @@ rfm12_start_tx(uint8_t type, uint8_t length)
 
 
 //! Copy a packet to the buffer and call rfm12_start_tx() to enqueue it for transmission.
-/** If there is no active transmission, the packet header is written to the
-* transmission control buffer and the packet will be enqueued for transmission.
-* This function is not responsible for buffering the actual packet data.
-* The data has to be copied into the transmit buffer beforehand,
-* which can be accomplished by the rfm12_tx() function.
+/** If there is no active transmission, the buffer contents will be copied to the
+* internal transmission buffer. Finally the buffered packet is going to be enqueued by
+* calling rfm12_start_tx(). If automatic buffering of packet data is not necessary,
+* which is the case when the packet data does not change while the packet is enqueued
+* for transmission, then one could directly use the rfm12_start_tx() function.
+* 
 * Note that this function does not start the transmission, it merely enqueues the packet.
 * Transmissions are started by rfm12_tick().
 */
@@ -515,9 +518,12 @@ rfm12_tx ( uint8_t len, uint8_t type, uint8_t *data )
 
 //if receive mode is not disabled (default)
 #if !(RFM12_TRANSMIT_ONLY)
-	//function to clear buffer complete/occupied status
+	//! Function to clear buffer complete/occupied status.
+	/** This function will set the current receive buffer status to free and switch
+	* to the other buffer, which can then be read using rfm12_rx_buffer().
+	*/
 	//warning: without the attribute, gcc will inline this even if -Os is set
-	void __attribute__ ((noinline)) void rfm12_rx_clear()
+	void __attribute__((noinline)) rfm12_rx_clear()
 	{
 			//mark the current buffer as empty
 			ctrl.rf_buffer_out->status = STATUS_FREE;
@@ -530,7 +536,22 @@ rfm12_tx ( uint8_t len, uint8_t type, uint8_t *data )
 #endif /* !(RFM12_TRANSMIT_ONLY) */
 
 
-//main library initialization function
+//! This is the main library initialization function
+/**This function takes care of all module initialization, including:
+* - Setup of the used frequency band and external capacitor
+* - Setting the exact frequency (channel)
+* - Setting the transmission data rate
+* - Configuring various module related rx parameters, including the amplification
+* - Enabling the digital data filter
+* - Enabling the use of the modules fifo, as well as enabling sync pattern detection
+* - Configuring the automatic frequency correction
+* - Setting the transmit power 
+* 
+* Please note that the transmit power and receive amplification values are currently hard coded.
+*
+* This initialization function also sets up various library internal configuration structs and
+* puts the module into receive mode before returning.
+*/
 void rfm12_init()
 {
 	//initialize spi
@@ -550,7 +571,7 @@ void rfm12_init()
 	//set frequency
 	rfm12_data(RFM12_CMD_FREQUENCY | RFM12_FREQUENCY_CALC_433(FREQ) );
 
-	//set datarate
+	//set data rate
 	rfm12_data(RFM12_CMD_DATARATE | DATARATE_VALUE );
 	
 	//set rx parameters: int-in/vdi-out pin is vdi-out,
