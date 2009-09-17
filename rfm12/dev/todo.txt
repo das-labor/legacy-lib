@@ -1,11 +1,5 @@
-hansi:
-(please don't do this, I've got a plan)
-beautify & repair feature modes from rfm12_extra.*
-improve buffer management (see fixmes)
-
 whoever wants to do this:
 add more livectrl functions
-
 
 
 DO MORE THOROUGH BURN-IN TESTS
