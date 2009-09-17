@@ -18,6 +18,20 @@
  * @author Peter Fuhrmann, Hans-Gert Dahmen, Soeren Heisrath
  */
  
+/** \file rfm12_ctrl.h
+ * \brief rfm12 library live control feature header
+ * \author Soeren Heisrath
+ * \author Hans-Gert Dahmen
+ * \author Peter Fuhrmann
+ * \version 0.9.0
+ * \date 08.09.09
+ *
+ * This header declares all functions necessary for setting the baud rate and frquency.
+ *
+ * \note It is usually not required to explicitly include this header,
+ * as this is already done by rfm12.h.
+ */
+ 
 #ifndef _RFM12_CTRL_H
 #define _RFM12_CTRL_H
 
@@ -26,6 +40,7 @@
 */
  
 #if RFM12_LIVECTRL
+//see rfm12_ctrl.c for more documentation
 void rfm12_set_rate (uint16_t in_datarate);
 void rfm12_set_frequency (uint16_t in_freq);
 #endif /* RFM12_LIVECTRL */

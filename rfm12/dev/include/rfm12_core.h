@@ -37,8 +37,6 @@
 #define STATE_RX_IDLE 0
 #define STATE_RX_ACTIVE 1
 #define STATE_TX 2
-//FIXME: raw mode...
-#define MODE_RAW 2
 
 //packet header length in bytes
 #define PACKET_OVERHEAD 3

@@ -18,6 +18,19 @@
  * @author Peter Fuhrmann, Hans-Gert Dahmen, Soeren Heisrath
  */
 
+/** \file rfm12_ctrl.c
+ * \brief rfm12 library live control feature source
+ * \author Soeren Heisrath
+ * \author Hans-Gert Dahmen
+ * \author Peter Fuhrmann
+ * \version 0.9.0
+ * \date 08.09.09
+ *
+ * This file implements all functions necessary for setting the baud rate and frquency.
+ *
+ * \note This file is included directly by rfm12.c, for performance reasons.
+ */
+ 
 /******************************************************
  *    THIS FILE IS BEING INCLUDED DIRECTLY		*
  *		(for performance reasons)				*

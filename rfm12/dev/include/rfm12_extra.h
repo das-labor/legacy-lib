@@ -18,6 +18,20 @@
  * @author Peter Fuhrmann, Hans-Gert Dahmen, Soeren Heisrath
  */
  
+/** \file rfm12_extra.h
+ * \brief rfm12 library extra features header
+ * \author Hans-Gert Dahmen
+ * \author Peter Fuhrmann
+ * \author Soeren Heisrath
+ * \version 0.9.0
+ * \date 08.09.09
+ *
+ * This header declares all stuff related to extra features.
+ *
+ * \note It is usually not required to explicitly include this header,
+ * as this is already done by rfm12.h.
+ */
+ 
  /******************************************************
  *                                                    *
  *    NO  C O N F I G U R A T I O N  IN THIS FILE     *
@@ -34,20 +48,44 @@
 */
 
 #if RFM12_RECEIVE_CW
-	#define RFRXBUF_SIZE 55
-	#define STATE_EMPTY 0
-	#define STATE_RECEIVING 1
-	#define STATE_FULL 2
+	/** \name States and buffer size for the amplitude modulated receive feature.
+	* \anchor cw_defines
+	* \note You need to define RFM12_RECEIVE_CW as 1 to enable this.
+	* \see rfrxbuf_t and ISR(ADC_vect, ISR_NOBLOCK)
+	* @{
+	*/
+	//! The CW receive buffer size.
+	#define RFM12_CW_RFRXBUF_SIZE 55
+	//! The CW receive buffer is empty.
+	#define RFM12_CW_STATE_EMPTY 0
+	//! The CW receive buffer is active.
+	#define RFM12_CW_STATE_RECEIVING 1
+	//! The CW receive buffer is full.
+	#define RFM12_CW_STATE_FULL 2
+	//@}
 
+	//! The receive buffer structure for the amplitude modulated receive feature.
+	/** \note You need to define RFM12_RECEIVE_CW as 1 to enable this.
+	* \see cw_rxbuf (for further usage instructions) and ISR(ADC_vect, ISR_NOBLOCK)
+	* \headerfile rfm12.h
+	*/
 	typedef struct
 	{
+		//! A pointer into the buffer, used while receiving.
 		volatile	uint8_t p;
+		
+		//! The buffer's state.
+		/** \see See \ref cw_defines for a list of possible states */
 		volatile	uint8_t state;
-		uint8_t 	buf[RFRXBUF_SIZE];
-	} rfrxbuf_t;
+		
+		//! The data buffer
+		uint8_t 	buf[RFM12_CW_RFRXBUF_SIZE];
+	} rfm12_rfrxbuf_t;
 
+	//see rfm12_extra.c for more documentation
 	extern rfrxbuf_t cw_rxbuf;
-	 
+	
+	//see rfm12_extra.c for more documentation	
 	void adc_init();
 #endif /* RFM12_RECEIVE_CW */
 
@@ -57,19 +95,36 @@
 */
  
 #if RFM12_RAW_TX
-	/*
-	 * @description Enable the transmitter immediately.
-	 */
-	inline void rfm12_tx_on (void)
+	//see rfm12_extra.c for more documentation
+	void rfm12_rawmode(uint8_t setting);
+	
+	
+	//! Enable the transmitter immediately (Raw transmission mode).
+	/** This will send out the current buffer contents.
+	* This function is used to emulate amplitude modulated signals.
+	*
+	* \note You need to define RFM12_RAW_TX as 1 to enable this.
+	* \warning This will interfere with the wakeup timer feature.
+	* \todo Use power management shadow register if the wakeup timer feature is enabled.
+	* \see rfm12_tx_off() and rfm12_rawmode()
+	*/
+	static inline void rfm12_tx_on (void)
 	{
 		/* set enable transmission bit now. */
 		rfm12_data(RFM12_CMD_PWRMGT | PWRMGT_DEFAULT | RFM12_PWRMGT_ET);
 	}
 
-	/*
-	 * @description Set default settings (usually transmitter off, receiver on)
-	 */
-	inline void rfm12_tx_off (void)
+
+	//! Set default power mode (usually transmitter off, receiver on).
+	/** This will usually stop a transmission.
+	* This function is used to emulate amplitude modulated signals.
+	*
+	* \note You need to define RFM12_RAW_TX as 1 to enable this.
+	* \warning This will interfere with the wakeup timer feature.
+	* \todo Use power management shadow register if the wakeup timer feature is enabled.
+	* \see rfm12_tx_on() and rfm12_rawmode()
+	*/
+	static inline void rfm12_tx_off (void)
 	{
 		/* turn off everything. */
 		rfm12_data(RFM12_CMD_PWRMGT);
@@ -84,6 +139,7 @@
 #if RFM12_USE_WAKEUP_TIMER
 	//this function sets the wakeup timer register
 	//(see datasheet for values)
+	//see rfm12_extra.c for more documentation
 	void rfm12_set_wakeup_timer(uint16_t val);
 #endif /* RFM12_USE_WAKEUP_TIMER */
 
@@ -93,14 +149,23 @@
 */
 
 #if RFM12_LOW_BATT_DETECTOR
+	/**\name States for the low battery detection feature .
+	* \anchor batt_states
+	* @{
+	*/
+	//! Battery voltage is okay.
 	#define RFM12_BATT_OKAY 0
+	//! Low battery voltage detected.
 	#define RFM12_BATT_LOW 1
+	//@}
 
 	//this function sets the low battery detector and microcontroller clock divider register
 	//(see datasheet for values)
+	//see rfm12_extra.c for more documentation
 	void rfm12_set_batt_detector(uint16_t val);
 	
 	//return the battery status
+	//see rfm12_extra.c for more documentation
 	uint8_t rfm12_get_batt_status();
 #endif /* RFM12_LOW_BATT_DETECTOR */
 

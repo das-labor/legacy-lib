@@ -20,7 +20,7 @@
 
 
 /** \file rfm12.c
- * \brief rfm12 Library main file
+ * \brief rfm12 library main file
  * \author Hans-Gert Dahmen
  * \author Peter Fuhrmann
  * \author Soeren Heisrath
@@ -446,7 +446,6 @@ void rfm12_tick()
 		//enable the interrupt to continue the transmission
 		RFM12_INT_ON();
 	}
-
 }
 
 
@@ -459,6 +458,9 @@ void rfm12_tick()
 *
 * \note Note that this function does not start the transmission, it merely enqueues the packet. \n
 * Transmissions are started by rfm12_tick().
+* \param [type] The packet header type field
+* \param [length] The packet data length
+* \returns One of these defines: \ref tx_retvals
 */
 #if (RFM12_NORETURNS)
 void 
@@ -492,6 +494,10 @@ rfm12_start_tx(uint8_t type, uint8_t length)
 * 
 * \note Note that this function does not start the transmission, it merely enqueues the packet. \n
 * Transmissions are started by rfm12_tick().
+* \param [len] The packet data length
+* \param [type] The packet header type field
+* \param [data] Pointer to the packet data
+* \returns One of these defines: \ref tx_retvals
 */
 #if (RFM12_NORETURNS)
 void

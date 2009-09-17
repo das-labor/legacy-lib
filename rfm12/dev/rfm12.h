@@ -17,6 +17,17 @@
  *
  * @author Peter Fuhrmann, Hans-Gert Dahmen, Soeren Heisrath
  */
+ 
+/** \file rfm12.h
+ * \brief rfm12 library main header
+ * \author Hans-Gert Dahmen
+ * \author Peter Fuhrmann
+ * \author Soeren Heisrath
+ * \version 0.9.0
+ * \date 08.09.09
+ *
+ * This header represents the library's core API.
+ */
 
 /******************************************************
  *                                                    *
@@ -29,8 +40,8 @@
 #ifndef _RFM12_H
 #define _RFM12_H
 
-//! \name States for rx and tx buffers
-/** \anchor rxtx_states
+/** \name States for rx and tx buffers
+* \anchor rxtx_states
 * \see rfm12_rx_status() and rfm12_control_t
 * @{
 */
@@ -43,8 +54,11 @@
 //@}
 
 
-//! \name  Return values for rfm12_tx() and rfm12_start_tx()
-//@{
+/** \name  Return values for rfm12_tx() and rfm12_start_tx()
+* \anchor tx_retvals
+* \see rfm12_tx() and rfm12_start_tx()
+* @{
+*/
 //!  The packet data is longer than the internal buffer
 #define RFM12_TX_ERROR 0x02
 //! The transmit buffer is already occupied
@@ -58,6 +72,7 @@
  * function protoypes
 */
 
+//see rfm12.c for more documentation
 void rfm12_init();
 void rfm12_tick();
 
@@ -70,6 +85,7 @@ void rfm12_tick();
 // uint8_t rfm12_tx_status();
 
 #if (RFM12_NORETURNS)
+//see rfm12.c for more documentation
 void rfm12_start_tx(uint8_t type, uint8_t length);
 void rfm12_tx(uint8_t len, uint8_t type, uint8_t *data);
 #else
@@ -82,9 +98,10 @@ uint8_t rfm12_tx(uint8_t len, uint8_t type, uint8_t *data);
  * private control structs
  */
 
-//! The transmission buffer structure
+//! The transmission buffer structure.
 /** \note Note that this complete buffer is transmitted sequentially,
 * beginning with the sync bytes.
+*
 * \see rfm12_start_tx(), rfm12_tx() and rf_tx_buffer
 */
 typedef struct
@@ -108,15 +125,16 @@ typedef struct
 
 //if receive mode is not disabled (default)
 #if !(RFM12_TRANSMIT_ONLY)
-	//! The receive buffer structure
+	//! The receive buffer structure.
 	/** \note Note that there will be two receive buffers of this type,
 	* as double buffering is being employed by this library.
+	*
 	* \see rfm12_rx_status(), rfm12_rx_len(), rfm12_rx_type(), rfm12_rx_buffer() and rf_rx_buffers
 	*/
 	typedef struct
 	{
 		//! Indicates if the buffer is free or completed.
-		/** \see \ref rxtx_states States for rx and tx buffers. */
+		/** \see \ref rxtx_states States for rx and tx buffers */
 		volatile uint8_t status;
 		
 		//! Length byte - number of bytes in buffer.
@@ -134,10 +152,11 @@ typedef struct
 #endif /* !(RFM12_TRANSMIT_ONLY) */	
  
 
-//! Control and status structure
+//! Control and status structure.
 /** This data structure keeps all control and some status related variables. \n
 * By using a central structure for all global variables, the compiler can
 * use smaller instructions and reduce the size of the binary.
+*
 * \note Some states are defined in the non-documented rfm12_core.h header file.
 * \see ISR(RFM12_INT_VECT, ISR_NOBLOCK), rfm12_tick() and ctrl
 */
@@ -174,14 +193,14 @@ typedef struct
 	
 	//wakeup timer feature
 	#if RFM12_USE_WAKEUP_TIMER
-		//! Power management shadow register
+		//! Power management shadow register.
 		/** The wakeup timer feature needs to buffer the current power management state. */
 		uint16_t pwrmgt_shadow;
 	#endif /* RFM12_USE_WAKEUP_TIMER */
 	
 	#if RFM12_LOW_BATT_DETECTOR
-		//! Low battery detector status
-		/** \see \ref batt_states States for the low battery detection feature. */
+		//! Low battery detector status.
+		/** \see \ref batt_states States for the low battery detection feature */
 		uint8_t low_batt;
 	#endif /* RFM12_LOW_BATT_DETECTOR */
 } rfm12_control_t;
@@ -210,7 +229,7 @@ extern rfm12_control_t ctrl;
 
 //if receive mode is not disabled (default)
 #if !(RFM12_TRANSMIT_ONLY)
-	//! Inline function to return the rx buffer status byte
+	//! Inline function to return the rx buffer status byte.
 	/** \see \ref rxtx_states States for rx and tx buffers
 	* \returns STATUS_FREE or STATUS_COMPLETE
 	*/
@@ -219,19 +238,22 @@ extern rfm12_control_t ctrl;
 		return ctrl.rf_buffer_out->status;
 	}
 
-	//! Inline function to return the rx buffer length field
+	//! Inline function to return the rx buffer length field.
+	/** \returns The length of the data inside the buffer */
 	static inline uint8_t rfm12_rx_len()
 	{
 		return ctrl.rf_buffer_out->len;
 	}
 
-	//! Inline function to return the rx buffer type field
+	//! Inline function to return the rx buffer type field.
+	/** \returns The packet type from the packet header type field */
 	static inline uint8_t rfm12_rx_type()
 	{
 		return ctrl.rf_buffer_out->type;
 	}
 
-	//! Inline function to retreive current rf buffer contents
+	//! Inline function to retreive current rf buffer contents.
+	/** \returns A pointer to the current receive buffer contents */
 	static inline uint8_t *rfm12_rx_buffer()
 	{
 		return (uint8_t*) ctrl.rf_buffer_out->buffer;
