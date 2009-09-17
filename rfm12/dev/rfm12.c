@@ -21,7 +21,9 @@
 
 /** \file rfm12.c
  * \brief rfm12 Library main file
- * \author Hans-Gert Dahmen, Peter Fuhrmann, Soeren Heisrath
+ * \author Hans-Gert Dahmen
+ * \author Peter Fuhrmann
+ * \author Soeren Heisrath
  * \version 0.9.0
  * \date 08.09.09
  *
@@ -70,7 +72,7 @@ rfm12_control_t ctrl;
 
 /************************
  * load other core and external components
- * (putting them directly into here allows the GCC to optimize better)
+ * (putting them directly into here allows GCC to optimize better)
 */
 
 /* include spi functions into here */
@@ -326,6 +328,8 @@ ISR(RFM12_INT_VECT, ISR_NOBLOCK)
 * algorithm indicates that the air is free, then the interrupt control variables are
 * setup for packet transmission and the rfm12 is switched to transmit mode.
 * This function also fills the rfm12 tx fifo with a preamble.
+*
+* \warning Warning, if you do not call this function periodically, then no packet will get transmitted.
 */
 void rfm12_tick()
 {	
@@ -453,7 +457,7 @@ void rfm12_tick()
 * The data has to be copied into the transmit buffer beforehand,
 * which can be accomplished by the rfm12_tx() function.
 *
-* Note that this function does not start the transmission, it merely enqueues the packet.
+* \note Note that this function does not start the transmission, it merely enqueues the packet. \n
 * Transmissions are started by rfm12_tick().
 */
 #if (RFM12_NORETURNS)
@@ -486,7 +490,7 @@ rfm12_start_tx(uint8_t type, uint8_t length)
 * which is the case when the packet data does not change while the packet is enqueued
 * for transmission, then one could directly use the rfm12_start_tx() function.
 * 
-* Note that this function does not start the transmission, it merely enqueues the packet.
+* \note Note that this function does not start the transmission, it merely enqueues the packet. \n
 * Transmissions are started by rfm12_tick().
 */
 #if (RFM12_NORETURNS)
@@ -546,11 +550,12 @@ rfm12_tx ( uint8_t len, uint8_t type, uint8_t *data )
 * - Enabling the use of the modules fifo, as well as enabling sync pattern detection
 * - Configuring the automatic frequency correction
 * - Setting the transmit power 
-* 
-* Please note that the transmit power and receive amplification values are currently hard coded.
 *
 * This initialization function also sets up various library internal configuration structs and
 * puts the module into receive mode before returning.
+*
+* \note Please note that the transmit power and receive amplification values are currently hard coded.
+* Have a look into rfm12_hw.h for possible settings.
 */
 void rfm12_init()
 {
