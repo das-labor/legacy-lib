@@ -113,6 +113,8 @@ rfm12_control_t ctrl;
 * The interrupt handles the RGIT and FFIT events by default.
 * Upon specific configuration of the library the WKUP and LBD events
 * are handled additionally.
+*
+* \see rfm12_control_t, rf_rx_buffer_t and rf_tx_buffer_t
 */
 ISR(RFM12_INT_VECT, ISR_NOBLOCK)
 {
@@ -330,6 +332,7 @@ ISR(RFM12_INT_VECT, ISR_NOBLOCK)
 * This function also fills the rfm12 tx fifo with a preamble.
 *
 * \warning Warning, if you do not call this function periodically, then no packet will get transmitted.
+* \see rfm12_tx() and rfm12_start_tx()
 */
 void rfm12_tick()
 {	
@@ -461,6 +464,7 @@ void rfm12_tick()
 * \param [type] The packet header type field
 * \param [length] The packet data length
 * \returns One of these defines: \ref tx_retvals
+* \see rfm12_tx() and rfm12_tick()
 */
 #if (RFM12_NORETURNS)
 void 
@@ -498,6 +502,7 @@ rfm12_start_tx(uint8_t type, uint8_t length)
 * \param [type] The packet header type field
 * \param [data] Pointer to the packet data
 * \returns One of these defines: \ref tx_retvals
+* \see rfm12_start_tx() and rfm12_tick()
 */
 #if (RFM12_NORETURNS)
 void
@@ -531,6 +536,8 @@ rfm12_tx ( uint8_t len, uint8_t type, uint8_t *data )
 	//! Function to clear buffer complete/occupied status.
 	/** This function will set the current receive buffer status to free and switch
 	* to the other buffer, which can then be read using rfm12_rx_buffer().
+	*
+	* \see rfm12_rx_status(), rfm12_rx_len(), rfm12_rx_type(), rfm12_rx_buffer() and rf_rx_buffers
 	*/
 	//warning: without the attribute, gcc will inline this even if -Os is set
 	void __attribute__((noinline)) rfm12_rx_clear()

@@ -228,6 +228,7 @@
 	//! This function sets the low battery detector and microcontroller clock divider register.
 	/** \param [val]  The register value to be passed to the rf12. \n
 	* See the rf12 datasheet for valid values.
+	* \see rfm12_get_batt_status()
 	*/
 	void rfm12_set_batt_detector(uint16_t val)
 	{	
@@ -236,7 +237,9 @@
 	}
 	
 	//! Return the current low battery detector status.
-	/** \returns One of thse defines: \ref batt_states */
+	/** \returns One of thse defines: \ref batt_states
+	* \see rfm12_set_batt_detector() and the \ref batt_states defines
+	*/
 	uint8_t rfm12_get_batt_status()
 	{
 		return ctrl.low_batt;

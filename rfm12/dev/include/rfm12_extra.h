@@ -151,6 +151,7 @@
 #if RFM12_LOW_BATT_DETECTOR
 	/**\name States for the low battery detection feature .
 	* \anchor batt_states
+	* \see rfm12_set_batt_detector() and rfm12_get_batt_status()
 	* @{
 	*/
 	//! Battery voltage is okay.

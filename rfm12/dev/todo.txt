@@ -1,6 +1,9 @@
 whoever wants to do this:
 add more livectrl functions
 
+hansi:
+add patch that i got via mail for supporting different frequency bands than 433MHz
+
 
 DO MORE THOROUGH BURN-IN TESTS
 we need at least three devices

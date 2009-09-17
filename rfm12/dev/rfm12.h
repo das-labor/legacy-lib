@@ -129,7 +129,7 @@ typedef struct
 	/** \note Note that there will be two receive buffers of this type,
 	* as double buffering is being employed by this library.
 	*
-	* \see rfm12_rx_status(), rfm12_rx_len(), rfm12_rx_type(), rfm12_rx_buffer() and rf_rx_buffers
+	* \see rfm12_rx_status(), rfm12_rx_len(), rfm12_rx_type(), rfm12_rx_buffer() , rfm12_rx_clear() and rf_rx_buffers
 	*/
 	typedef struct
 	{
@@ -200,7 +200,9 @@ typedef struct
 	
 	#if RFM12_LOW_BATT_DETECTOR
 		//! Low battery detector status.
-		/** \see \ref batt_states States for the low battery detection feature */
+		/** \see \ref batt_states States for the low battery detection feature,
+		* as well as rfm12_set_batt_detector() and rfm12_get_batt_status()
+		*/
 		uint8_t low_batt;
 	#endif /* RFM12_LOW_BATT_DETECTOR */
 } rfm12_control_t;
@@ -230,8 +232,8 @@ extern rfm12_control_t ctrl;
 //if receive mode is not disabled (default)
 #if !(RFM12_TRANSMIT_ONLY)
 	//! Inline function to return the rx buffer status byte.
-	/** \see \ref rxtx_states States for rx and tx buffers
-	* \returns STATUS_FREE or STATUS_COMPLETE
+	/** \returns STATUS_FREE or STATUS_COMPLETE
+	* \see \ref rxtx_states for rx buffer states, rfm12_rx_len(), rfm12_rx_type(), rfm12_rx_buffer(), rfm12_rx_clear() and rf_rx_buffer_t
 	*/
 	static inline uint8_t rfm12_rx_status()
 	{
@@ -239,21 +241,27 @@ extern rfm12_control_t ctrl;
 	}
 
 	//! Inline function to return the rx buffer length field.
-	/** \returns The length of the data inside the buffer */
+	/** \returns The length of the data inside the buffer
+	* \see rfm12_rx_status(), rfm12_rx_type(), rfm12_rx_buffer(), rfm12_rx_clear() and rf_rx_buffer_t
+	*/
 	static inline uint8_t rfm12_rx_len()
 	{
 		return ctrl.rf_buffer_out->len;
 	}
 
 	//! Inline function to return the rx buffer type field.
-	/** \returns The packet type from the packet header type field */
+	/** \returns The packet type from the packet header type field
+	* \see rfm12_rx_status(), rfm12_rx_len(), rfm12_rx_buffer(), rfm12_rx_clear() and rf_rx_buffer_t
+	*/
 	static inline uint8_t rfm12_rx_type()
 	{
 		return ctrl.rf_buffer_out->type;
 	}
 
 	//! Inline function to retreive current rf buffer contents.
-	/** \returns A pointer to the current receive buffer contents */
+	/** \returns A pointer to the current receive buffer contents
+	* \see rfm12_rx_status(), rfm12_rx_len(), rfm12_rx_type(), rfm12_rx_clear() and rf_rx_buffer_t
+	*/
 	static inline uint8_t *rfm12_rx_buffer()
 	{
 		return (uint8_t*) ctrl.rf_buffer_out->buffer;

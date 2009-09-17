@@ -30,6 +30,7 @@
  *
  * \note It is usually not required to explicitly include this header,
  * as this is already done by rfm12.h.
+ * \todo Add more livectrl functions.
  */
  
 #ifndef _RFM12_CTRL_H

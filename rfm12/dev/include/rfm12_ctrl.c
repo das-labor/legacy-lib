@@ -29,6 +29,7 @@
  * This file implements all functions necessary for setting the baud rate and frquency.
  *
  * \note This file is included directly by rfm12.c, for performance reasons.
+ * \todo Add more livectrl functions.
  */
  
 /******************************************************
@@ -38,11 +39,27 @@
 
 
 #if RFM12_LIVECTRL
+//! Set the data rate of the rf12.
+/** The data rate has to be specified using the following macros:
+* - RFM12_DATARATE_CALC_HIGH(x) for rates >= 2700 Baud
+* - RFM12_DATARATE_CALC_LOW(x) for rates from 340 to < 2700 Baud
+*
+* Please refer to the rfm12 library configuration header for a demo macro usage. \n
+* The data rate calculation macros can be found in  rfm12_hw.h.
+* They are not included as a function for code-size reasons.
+*/
 void rfm12_set_rate (uint16_t in_datarate)
 {
 	rfm12_data(RFM12_CMD_DATARATE | DATARATE_VALUE );
 }
 
+//! Set the frequency of the rf12.
+/** The frequency has to be specified using the RFM12_FREQUENCY_CALC_433(x) macro.
+*
+* Please refer to the rfm12 library configuration header for a demo macro usage. \n
+* The frequency calculation macro can be found in  rfm12_hw.h.
+* It is not included as a function for code-size reasons.
+*/
 void rfm12_set_frequency (uint16_t in_freq)
 {
 	rfm12_data(RFM12_CMD_FREQUENCY | in_freq );
