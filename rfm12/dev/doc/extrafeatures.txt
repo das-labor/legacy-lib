@@ -1,0 +1,4 @@
+/** \page extra_features Extra Features
+ *
+ * Bla!
+ */
