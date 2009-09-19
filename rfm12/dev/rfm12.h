@@ -134,7 +134,7 @@ typedef struct
 	typedef struct
 	{
 		//! Indicates if the buffer is free or completed.
-		/** \see \ref rxtx_states States for rx and tx buffers */
+		/** \see \ref rxtx_states "States for rx and tx buffers" */
 		volatile uint8_t status;
 		
 		//! Length byte - number of bytes in buffer.
@@ -166,7 +166,7 @@ typedef struct
 	volatile uint8_t rfm12_state;
 	
 	//! Transmit buffer status.
-	/** \see \ref rxtx_states States for rx and tx buffers */
+	/** \see \ref rxtx_states "States for rx and tx buffers" */
 	volatile uint8_t txstate;
 	
 	//! Number of bytes to transmit or receive.
@@ -200,7 +200,7 @@ typedef struct
 	
 	#if RFM12_LOW_BATT_DETECTOR
 		//! Low battery detector status.
-		/** \see \ref batt_states States for the low battery detection feature,
+		/** \see \ref batt_states "States for the low battery detection feature",
 		* as well as rfm12_set_batt_detector() and rfm12_get_batt_status()
 		*/
 		uint8_t low_batt;
@@ -233,7 +233,7 @@ extern rfm12_control_t ctrl;
 #if !(RFM12_TRANSMIT_ONLY)
 	//! Inline function to return the rx buffer status byte.
 	/** \returns STATUS_FREE or STATUS_COMPLETE
-	* \see \ref rxtx_states for rx buffer states, rfm12_rx_len(), rfm12_rx_type(), rfm12_rx_buffer(), rfm12_rx_clear() and rf_rx_buffer_t
+	* \see \ref rxtx_states "rx buffer states", rfm12_rx_len(), rfm12_rx_type(), rfm12_rx_buffer(), rfm12_rx_clear() and rf_rx_buffer_t
 	*/
 	static inline uint8_t rfm12_rx_status()
 	{

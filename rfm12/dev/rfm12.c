@@ -340,7 +340,7 @@ void rfm12_tick()
 	#if !(RFM12_NOCOLLISIONDETECTION)
 		uint16_t status;
 		
-		//start with a channel free count of 16, this is necessary for the CW (ADC)  receive feature to work
+		//start with a channel free count of 16, this is necessary for the ASK receive feature to work
 		static uint8_t channel_free_count = 16; //static local variables produce smaller code size than globals
 	#endif
 
@@ -371,7 +371,6 @@ void rfm12_tick()
 	#endif
 	
 	//don't disturb RFM12 if transmitting or receiving
-	//FIXME: raw tx mode is excluded from this check now
 	if(ctrl.rfm12_state != STATE_RX_IDLE)
 	{
 		return;
@@ -463,7 +462,7 @@ void rfm12_tick()
 * Transmissions are started by rfm12_tick().
 * \param [type] The packet header type field
 * \param [length] The packet data length
-* \returns One of these defines: \ref tx_retvals
+* \returns One of these defines: \ref tx_retvals "TX return values"
 * \see rfm12_tx() and rfm12_tick()
 */
 #if (RFM12_NORETURNS)
@@ -501,7 +500,7 @@ rfm12_start_tx(uint8_t type, uint8_t length)
 * \param [len] The packet data length
 * \param [type] The packet header type field
 * \param [data] Pointer to the packet data
-* \returns One of these defines: \ref tx_retvals
+* \returns One of these defines: \ref tx_retvals "TX return values"
 * \see rfm12_start_tx() and rfm12_tick()
 */
 #if (RFM12_NORETURNS)
@@ -634,11 +633,6 @@ void rfm12_init()
 		//ctrl.buffer_out_num = 0;
 	#endif /* !(RFM12_TRANSMIT_ONLY) */
 	
-	//raw tx feature initialization
-	#if RFM12_RAW_TX
-		rfm12_raw_tx = 0;
-	#endif
-	
 	//low battery detector feature initialization
 	#if RFM12_LOW_BATT_DETECTOR
 		ctrl.low_batt = RFM12_BATT_OKAY;
@@ -655,8 +649,8 @@ void rfm12_init()
 		ctrl.pwrmgt_shadow = (RFM12_CMD_PWRMGT | PWRMGT_RECEIVE);
 	#endif /* RFM12_USE_WAKEUP_TIMER */
 	
-	//raw receive mode feature initialization
-	#if RFM12_RECEIVE_CW
+	//ASK receive mode feature initialization
+	#if RFM12_RECEIVE_ASK
 		adc_init();
 	#endif
 

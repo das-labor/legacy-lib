@@ -119,14 +119,14 @@
 	#define PWRMGMT_WKUP 0
 #endif /* RFM12_USE_WAKEUP_TIMER */
 
-//if raw tx is not defined, we won't use this feature
-#ifndef RFM12_RAW_TX
-	#define RFM12_RAW_TX 0
+//if ASK tx is not defined, we won't use this feature
+#ifndef RFM12_TRANSMIT_ASK
+	#define RFM12_TRANSMIT_ASK 0
 #endif
 
-//if receive cw is not defined, we won't use this feature
-#ifndef RFM12_RECEIVE_CW
-	#define RFM12_RECEIVE_CW 0
+//if receive ASK is not defined, we won't use this feature
+#ifndef RFM12_RECEIVE_ASK
+	#define RFM12_RECEIVE_ASK 0
 #endif
 
 //if software spi is not defined, we won't use this feature

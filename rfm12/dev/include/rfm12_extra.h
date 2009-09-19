@@ -47,26 +47,26 @@
  * amplitude modulation receive mode
 */
 
-#if RFM12_RECEIVE_CW
+#if RFM12_RECEIVE_ASK
 	/** \name States and buffer size for the amplitude modulated receive feature.
-	* \anchor cw_defines
-	* \note You need to define RFM12_RECEIVE_CW as 1 to enable this.
+	* \anchor ask_defines
+	* \note You need to define RFM12_RECEIVE_ASK as 1 to enable this.
 	* \see rfrxbuf_t and ISR(ADC_vect, ISR_NOBLOCK)
 	* @{
 	*/
-	//! The CW receive buffer size.
-	#define RFM12_CW_RFRXBUF_SIZE 55
-	//! The CW receive buffer is empty.
-	#define RFM12_CW_STATE_EMPTY 0
-	//! The CW receive buffer is active.
-	#define RFM12_CW_STATE_RECEIVING 1
-	//! The CW receive buffer is full.
-	#define RFM12_CW_STATE_FULL 2
+	//! The ASK receive buffer size.
+	#define RFM12_ASK_RFRXBUF_SIZE 55
+	//! The ASK receive buffer is empty.
+	#define RFM12_ASK_STATE_EMPTY 0
+	//! The ASK receive buffer is active.
+	#define RFM12_ASK_STATE_RECEIVING 1
+	//! The ASK receive buffer is full.
+	#define RFM12_ASK_STATE_FULL 2
 	//@}
 
 	//! The receive buffer structure for the amplitude modulated receive feature.
-	/** \note You need to define RFM12_RECEIVE_CW as 1 to enable this.
-	* \see cw_rxbuf (for further usage instructions) and ISR(ADC_vect, ISR_NOBLOCK)
+	/** \note You need to define RFM12_RECEIVE_ASK as 1 to enable this.
+	* \see ask_rxbuf (for further usage instructions) and ISR(ADC_vect, ISR_NOBLOCK)
 	* \headerfile rfm12.h
 	*/
 	typedef struct
@@ -75,38 +75,38 @@
 		volatile	uint8_t p;
 		
 		//! The buffer's state.
-		/** \see See \ref cw_defines for a list of possible states */
+		/** \see See \ref ask_defines "ASK mode defines" for a list of possible states */
 		volatile	uint8_t state;
 		
 		//! The data buffer
-		uint8_t 	buf[RFM12_CW_RFRXBUF_SIZE];
+		uint8_t 	buf[RFM12_ASK_RFRXBUF_SIZE];
 	} rfm12_rfrxbuf_t;
 
 	//see rfm12_extra.c for more documentation
-	extern rfrxbuf_t cw_rxbuf;
+	extern rfrxbuf_t ask_rxbuf;
 	
 	//see rfm12_extra.c for more documentation	
 	void adc_init();
-#endif /* RFM12_RECEIVE_CW */
+#endif /* RFM12_RECEIVE_ASK */
 
 
 /************************
  * amplitude modulated raw tx mode
 */
  
-#if RFM12_RAW_TX
+#if RFM12_TRANSMIT_ASK
 	//see rfm12_extra.c for more documentation
-	void rfm12_rawmode(uint8_t setting);
+	void rfm12_ask_tx_mode(uint8_t setting);
 	
 	
-	//! Enable the transmitter immediately (Raw transmission mode).
+	//! Enable the transmitter immediately (ASK transmission mode).
 	/** This will send out the current buffer contents.
 	* This function is used to emulate amplitude modulated signals.
 	*
-	* \note You need to define RFM12_RAW_TX as 1 to enable this.
+	* \note You need to define RFM12_TRANSMIT_ASK as 1 to enable this.
 	* \warning This will interfere with the wakeup timer feature.
 	* \todo Use power management shadow register if the wakeup timer feature is enabled.
-	* \see rfm12_tx_off() and rfm12_rawmode()
+	* \see rfm12_tx_off() and rfm12_ask_tx_mode()
 	*/
 	static inline void rfm12_tx_on (void)
 	{
@@ -119,17 +119,17 @@
 	/** This will usually stop a transmission.
 	* This function is used to emulate amplitude modulated signals.
 	*
-	* \note You need to define RFM12_RAW_TX as 1 to enable this.
+	* \note You need to define RFM12_TRANSMIT_ASK as 1 to enable this.
 	* \warning This will interfere with the wakeup timer feature.
 	* \todo Use power management shadow register if the wakeup timer feature is enabled.
-	* \see rfm12_tx_on() and rfm12_rawmode()
+	* \see rfm12_tx_on() and rfm12_ask_tx_mode()
 	*/
 	static inline void rfm12_tx_off (void)
 	{
 		/* turn off everything. */
 		rfm12_data(RFM12_CMD_PWRMGT);
 	}
-#endif /* RFM12_RAW_TX  */
+#endif /* RFM12_TRANSMIT_ASK  */
 
 
 /************************

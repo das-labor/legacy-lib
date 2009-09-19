@@ -41,25 +41,25 @@
  * amplitude modulation receive mode
 */
 
-#if RFM12_RECEIVE_CW
-	//! The CW-mode receive buffer structure.
+#if RFM12_RECEIVE_ASK
+	//! The ASK mode receive buffer structure.
 	/** You will need to poll the state field of this structure to determine
-	* if data is available, see \ref cw_defines. \n
+	* if data is available, see \ref ask_defines "ASK mode defines". \n
 	* Received data can be read from the buf field.
-	* It is necessary to reset the state field  to RFM12_CW_STATE_EMPTY after reading.
+	* It is necessary to reset the state field  to RFM12_ASK_STATE_EMPTY after reading.
 	*
-	* \note You need to define RFM12_RECEIVE_CW as 1 to enable this.
+	* \note You need to define RFM12_RECEIVE_ASK as 1 to enable this.
 	*/
-	rfm12_rfrxbuf_t cw_rxbuf;
+	rfm12_rfrxbuf_t ask_rxbuf;
 
 	
-	//! CW-mode ADC interrupt.
+	//! ASK mode ADC interrupt.
 	/** This interrupt function directly measures the receive signal strength
 	* on an analog output pin of the rf12 ic.
 	*
 	* You will need to solder something onto your rf12 module to make this to work.
 	*
-	* \note You need to define RFM12_RECEIVE_CW as 1 to enable this.
+	* \note You need to define RFM12_RECEIVE_ASK as 1 to enable this.
 	* \see adc_init() and rfm12_rfrxbuf_t
 	*/
 	ISR(ADC_vect, ISR_NOBLOCK)
@@ -98,16 +98,16 @@
 			ignore = 0;
 		}
 		
-		if(cw_rxbuf.state == RFM12_CW_STATE_EMPTY)
+		if(ask_rxbuf.state == RFM12_ASK_STATE_EMPTY)
 		{
 			if(value && (!ignore) )
 			{
 				//pulse_timer = 0;
 				TCNT0 = 0;
-				cw_rxbuf.p   = 0;
-				cw_rxbuf.state = RFM12_CW_STATE_RECEIVING;
+				ask_rxbuf.p   = 0;
+				ask_rxbuf.state = RFM12_ASK_STATE_RECEIVING;
 			}
-		}else if(cw_rxbuf.state == RFM12_CW_STATE_FULL)
+		}else if(ask_rxbuf.state == RFM12_ASK_STATE_FULL)
 		{
 			if(value)
 			{
@@ -115,25 +115,25 @@
 				ignore = 1;
 			}
 			
-		}else if(cw_rxbuf.state == RFM12_CW_STATE_RECEIVING)
+		}else if(ask_rxbuf.state == RFM12_ASK_STATE_RECEIVING)
 		{
 			if(value != oldvalue)
 			{
 
-				cw_rxbuf.buf[cw_rxbuf.p] = TCNT0;
+				ask_rxbuf.buf[ask_rxbuf.p] = TCNT0;
 				TCNT0 = 0;
 				//pulse_timer = 0;
-				if(cw_rxbuf.p != (RFM12_CW_RFRXBUF_SIZE-1) )
+				if(ask_rxbuf.p != (RFM12_ASK_RFRXBUF_SIZE-1) )
 				{
-					cw_rxbuf.p++;
+					ask_rxbuf.p++;
 				}
 			}else if(TCNT0 > 0xe0)
 			{
 				//if( !value ){
 				//PORTD |= (1<<PD6);
-					cw_rxbuf.state = RFM12_CW_STATE_FULL;
+					ask_rxbuf.state = RFM12_ASK_STATE_FULL;
 				//}else{
-				//	cw_rxbuf.state = STATE_EMPTY;
+				//	ask_rxbuf.state = STATE_EMPTY;
 				//}
 			}
 		}
@@ -148,10 +148,11 @@
 	}
 
 	
-	//! CW-mode ADC interrupt setup.
-	/** This will setup the ADC interrupt to receive amplitude modulated signals.
+	//! ASK mode ADC interrupt setup.
+	/** This will setup the ADC interrupt to receive ASK modulated signals.
+	* rfm12_init() calls this function automatically if ASK receive mode is enabled.
 	*
-	* \note You need to define RFM12_RECEIVE_CW as 1 to enable this.
+	* \note You need to define RFM12_RECEIVE_ASK as 1 to enable this.
 	* \see ISR(ADC_vect, ISR_NOBLOCK) and rfm12_rfrxbuf_t
 	*/
 	void adc_init()
@@ -163,26 +164,26 @@
 											//samplerate = 16MHz/(64*13) = 19231 Hz
 		
 	}
-#endif /* RFM12_RECEIVE_CW */
+#endif /* RFM12_RECEIVE_ASK */
 
 
 /************************
- * amplitude modulated raw tx mode
+ * ASK modulated raw tx mode
 */
 
-#if RFM12_RAW_TX
-	//! En- or disable raw transmissions.
-	/** When enabling raw mode, this function puts the internal state machine
-	*into transmit mode and disables the interrupt.
+#if RFM12_TRANSMIT_ASK
+	//! En- or disable ASK transmissions.
+	/** When enabling ASK tx mode, this function puts the internal state machine
+	* into transmit mode and disables the interrupt.
 	* Otherwise it will restore normale operation.
 	*
 	* \param [setting] Pass 1 to enable the raw mode, 0 to disable it.
-	* \note You need to define RFM12_RAW_TX as 1 to enable this.
+	* \note You need to define RFM12_TRANSMIT_ASK as 1 to enable this.
 	* \warning This will interfere with the wakeup timer feature.
 	* \todo Use power management shadow register if the wakeup timer feature is enabled.
 	* \see rfm12_tx_on() and rfm12_tx_off()
 	*/
-	void rfm12_rawmode(uint8_t setting)
+	void rfm12_ask_tx_mode(uint8_t setting)
 	{
 		if (setting)
 		{
@@ -196,7 +197,7 @@
 			ctrl.rfm12_state = STATE_RX_IDLE;
 		}
 	}
-#endif /* RFM12_RAW_TX */
+#endif /* RFM12_TRANSMIT_ASK */
 
 
 /************************
@@ -237,8 +238,8 @@
 	}
 	
 	//! Return the current low battery detector status.
-	/** \returns One of thse defines: \ref batt_states
-	* \see rfm12_set_batt_detector() and the \ref batt_states defines
+	/** \returns One of these \ref batt_states "battery states" .
+	* \see rfm12_set_batt_detector() and the \ref batt_states "battery state" defines
 	*/
 	uint8_t rfm12_get_batt_status()
 	{
