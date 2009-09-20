@@ -30,7 +30,7 @@
  * We're also happy to receive patches, given the case you already modified the library and added or changed some meaningful stuff.
  *
  * The project page of this library might contain some additional information.
- * It is located here: <a href="http://www.das-labor.org/wiki/RFM12_Library">http://www.das-labor.org/wiki/RFM12_library/en</a>
+ * It is located here: <a href="http://www.das-labor.org/wiki/RFM12_library/en">http://www.das-labor.org/wiki/RFM12_library/en</a>
  * (also available in <a href="http://www.das-labor.org/wiki/RFM12_library">German</a>).
  *
  * \section feat_sec Library Features
@@ -64,7 +64,7 @@
  *
  * Next you will have to download the library (if you haven't done so yet) and place it somewhere next to your source folder.
  *
- * In order to run, the library will need some configuration, which is stored in a header file usually named RFM12_config.h.
+ * In order to run, the library will need some configuration, which is stored in a header file usually named rfm12_config.h.
  * See the section \ref conf_sec "Configuration" for more information on how to configure the library.
  * Otherwise just take the demo configuration header from the library folder, put into your source folder and change the values to your needs.
  * The library itself will not include the configuration file, you have to do this manually before including the rfm12.h header.
@@ -95,12 +95,12 @@
  *
  * Using the library to transmit or receive data packets turns out to be incredibly simple. \n
  * Just do the following:
- * - At the beginning of your application, call RFM12_init() once to initialize the module
- * - Call RFM12_tick() periodically, as it will maintain the collision avoidance and start transferring your enqueued packets
- * - Use the RFM12_tx() function to enqueue a packet for transmission
- * - Check if a packet has been received via RFM12_rx_status()
- * - Read packet length, type and contents using RFM12_rx_len(), RFM12_rx_type(), RFM12_rx_buffer()
- * - Be sure to clear the received packet buffer after reading a packet by calling RFM12_rx_clear()
+ * - At the beginning of your application, call rfm12_init() once to initialize the module
+ * - Call rfm12_tick() periodically, as it will maintain the collision avoidance and start transferring your enqueued packets
+ * - Use the rfm12_tx() function to enqueue a packet for transmission
+ * - Check if a packet has been received via rfm12_rx_status()
+ * - Read packet length, type and contents using rfm12_rx_len(), rfm12_rx_type(), rfm12_rx_buffer()
+ * - Be sure to clear the received packet buffer after reading a packet by calling rfm12_rx_clear()
  *
  * Click the function name links to get to the documentation.
  *
@@ -108,14 +108,14 @@
  * \code
  * uint8_t teststring[] = "teststring\r\n";
  * uint8_t packettype = 0xEE;
- * RFM12_init();  /* initialize the library */
+ * rfm12_init();  /* initialize the library */
  * sei();
  * 
  * while (23)
  * {
  *   /* ... */
- *   RFM12_tx (sizeof(teststring), packettype, teststring);
- *   RFM12_tick();  /* periodic tick function - call that one once in a while */
+ *   rfm12_tx (sizeof(teststring), packettype, teststring);
+ *   rfm12_tick();  /* periodic tick function - call that one once in a while */
  * }
  * \endcode
  *
@@ -211,8 +211,8 @@ nSEL            | Slave select pin defined below
  * The following section configures RFM12 related stuff, such as the exact frequency to use, the baudrate and the buffer sizes.
  *
  * \code
- * //frequency to use
- * #define FREQ 433000000UL
+ * //center frequency to use (+-125kHz FSK frequency shift)
+ * #define FREQ 433175000UL
  * 
  * //use this for datarates >= 2700 Baud
  * #define DATARATE_VALUE RFM12_DATARATE_CALC_HIGH(9600.0)
@@ -227,7 +227,8 @@ nSEL            | Slave select pin defined below
  * #define RFM12_RX_BUFFER_SIZE 30 
  * \endcode
  *
- * The frequency has to be in the frequency band of your module. The maximum baud rate is 115.2 kbps.\n
+ * The frequency has to be in the frequency band of your module. This is only the center frequency, the
+ * module will need +-125kHz for modulation. The maximum baud rate is 115.2 kbps. \n
  * Please note that the buffers will consume ram, so be careful when making them larger. \n
  * If you set all buffers to 255 bytes, which is the maximum packet size, then you will consume 3 * 255 bytes of ram.
  *

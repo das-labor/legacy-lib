@@ -493,7 +493,8 @@ rfm12_start_tx(uint8_t type, uint8_t length)
 * internal transmission buffer. Finally the buffered packet is going to be enqueued by
 * calling rfm12_start_tx(). If automatic buffering of packet data is not necessary,
 * which is the case when the packet data does not change while the packet is enqueued
-* for transmission, then one could directly use the rfm12_start_tx() function.
+* for transmission, then one could directly store the data in \ref rf_tx_buffer
+* (see rf_tx_buffer_t) and use the rfm12_start_tx() function.
 * 
 * \note Note that this function does not start the transmission, it merely enqueues the packet. \n
 * Transmissions are started by rfm12_tick().
