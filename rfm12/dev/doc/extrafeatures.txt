@@ -1,4 +1,10 @@
 /** \page extra_features Extra Features
  *
- * Bla!
+ * \section feature_ctrl_sec Live Control Feature
+ *
+ * \section feature_ask_sec ASK Modulation Feature
+ *
+ * \section feature_wakeup_sec Wakeup Timer Feature
+ * 
+ * \section feature_lbd_sec Low-Battery Detector Feature
  */
