@@ -584,7 +584,7 @@ void rfm12_init(void)
 
 	//enable internal data register and fifo
 	//setup selected band
-	rfm12_data(RFM12_CMD_CFG | RFM12_CFG_EL | RFM12_CFG_EF | RFM12_BAND_433 | RFM12_XTAL_12PF);
+	rfm12_data(RFM12_CMD_CFG | RFM12_CFG_EL | RFM12_CFG_EF | RFM12_BASEBAND | RFM12_XTAL_12PF);
 	
 	//set power default state (usually disable clock output)
 	//do not write the power register two times in a short time
@@ -592,7 +592,7 @@ void rfm12_init(void)
 	rfm12_data(RFM12_CMD_PWRMGT | PWRMGT_DEFAULT);
 
 	//set frequency
-	rfm12_data(RFM12_CMD_FREQUENCY | RFM12_FREQUENCY_CALC_433(FREQ) );
+	rfm12_data(RFM12_CMD_FREQUENCY | RFM12_FREQUENCY_CALC(FREQ) );
 
 	//set data rate
 	rfm12_data(RFM12_CMD_DATARATE | DATARATE_VALUE );

@@ -71,7 +71,10 @@
 /************************
  * RFM12 CONFIGURATION OPTIONS
  */
- 
+
+//baseband of the module (either RFM12_BAND_433, RFM12_BAND_868 or RFM12_BAND_912)
+#define RFM12_BASEBAND RFM12_BAND_433
+
 //center frequency to use (+-125kHz FSK frequency shift)
 #define FREQ 433175000UL
 

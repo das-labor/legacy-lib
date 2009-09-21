@@ -39,7 +39,7 @@
  *  - Packet length up to 255 bytes
  *  - A simple header checksum
  * - Interrupt or polling based packet transfer handling
- * - Multiple frequency bands, depending on the used module (315, 433, 868 and 915 MHz)
+ * - Multiple frequency bands, depending on the used module (433, 868 and 915 MHz)
  * - Collision avoidance (carrier sense)
  * - Usage of syncronization patterns to start data reception
  * - Hardware or software SPI support
@@ -208,13 +208,16 @@ nSEL            | Slave select pin defined below
  * #define BIT_SPI_SS 4
  * \endcode
  * Even when you are using hardware SPI, you could still use this more detailed pin configuration,
- * but you have to include the hardware SPI SS defines and match the port and pins to your hardware SPI port.
+ * but then you still have to include the hardware SPI SS defines and match the port and pins to your hardware SPI port.
  *
  * \subsection conf_rfm12_sec RFM12 Configuration
  *
  * The following section configures RFM12 related stuff, such as the exact frequency to use, the baudrate and the buffer sizes.
  *
  * \code
+ * //baseband of the module (either RFM12_BAND_433, RFM12_BAND_868 or RFM12_BAND_912)
+ * #define RFM12_BASEBAND RFM12_BAND_433
+ * 
  * //center frequency to use (+-125kHz FSK frequency shift)
  * #define FREQ 433175000UL
  * 

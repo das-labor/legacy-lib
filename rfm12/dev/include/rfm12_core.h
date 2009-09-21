@@ -185,6 +185,18 @@
 #endif
 
 
+//baseband selection
+#if (RFM12_BASEBAND) == RFM12_BAND_433
+	#define RFM12_FREQUENCY_CALC(x) RFM12_FREQUENCY_CALC_433(x)
+#elif (RFM12_BASEBAND) == RFM12_BAND_868
+	#define RFM12_FREQUENCY_CALC(x) RFM12_FREQUENCY_CALC_868(x)
+#elif (RFM12_BASEBAND) == RFM12_BAND_915
+	#define RFM12_FREQUENCY_CALC(x) RFM12_FREQUENCY_CALC_915(x)
+#else
+	#error "Unsupported RFM12 baseband selected."
+#endif
+
+
 /************************
 * HELPER MACROS
 */
