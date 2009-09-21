@@ -40,7 +40,7 @@
  * - Interrupt or polling based packet transfer handling
  * - Multiple frequency bands, depending on the used module (433, 868 and 915 MHz)
  * - Collision avoidance (carrier sense)
- * - Usage of syncronization patterns to start data reception
+ * - Usage of synchronization patterns to start data reception
  * - Hardware or software SPI support
  * - Transmit only mode, to reduce the size of the binary
  * - Basic ASK (amplitude shift keying) receive and transmit functionality (for radio controlled outlets and the like)
@@ -338,9 +338,9 @@ nSEL            | Slave select pin defined below
  * To minimize erroneous packet transfers, a simple collision avoidance algorithm has been implemented.
  * All packet transfers are enqueued into an internal buffer before transmission. A periodically called function (rfm12_tick())
  * measures if a carrier signal is present, and if so, inhibits further packet transfers for a settable time.
- * If the selected frequency is free long enough, an enequeud packet transfer will be started by rfm12_tick().
+ * If the selected frequency is free long enough, an enqueud packet transfer will be started by rfm12_tick().
  *
- * The interrupt handles fifo over- and underflow, low battery detection and wakeup timer events. If a fifo interrupt occurs,
+ * The interrupt handles FIFO over- and underflow, low-battery detection and wakeup timer events. If a FIFO interrupt occurs,
  * the current operating state is determined (receiving or transmitting) and the next byte is either read or written to or from the FIFO.
  *
  * See \ref extra_features "extra features" for more details about the extra features.
@@ -348,8 +348,8 @@ nSEL            | Slave select pin defined below
  * \section credits_sec Credits
  *
  * The library has been created by Hans-Gert Dahmen and Peter Fuhrmann. Some of the extra features have been implemented by Soeren Heisrath.
- * All main authors are members of <a href="http://www.das-labor.org/">Das LABOR</a>, a Hackerspace in Germany.
+ * All main authors are members of <a href="http://www.das-labor.org/">Das LABOR</a>, a hackerspace in Germany.
  * Thanks to Das LABOR for providing the great infrastructure and environment!
  *
- * Thanks to Alexander Krause for contributing a patch that allows different frequency bands than 433MHz to be used.
+ * Thanks to Alexander Krause for contributing a patch that allows frequency bands other than 433MHz to be used.
  */
