@@ -143,7 +143,7 @@
 	
 	//return the battery status
 	//see rfm12_extra.c for more documentation
-	uint8_t rfm12_get_batt_status();
+	uint8_t rfm12_get_batt_status(void);
 #endif /* RFM12_LOW_BATT_DETECTOR */
 
 #endif /* _RFM12_EXTRA_H */

@@ -73,12 +73,12 @@
 */
 
 //see rfm12.c for more documentation
-void rfm12_init();
-void rfm12_tick();
+void rfm12_init(void);
+void rfm12_tick(void);
 
 //if receive mode is not disabled (default)
 #if !(RFM12_TRANSMIT_ONLY)
-	void rfm12_rx_clear();
+	void rfm12_rx_clear(void);
 #endif /* !(RFM12_TRANSMIT_ONLY) */
 
 //FIXME: the tx function should return a status, do we need to do this also?
@@ -95,7 +95,7 @@ uint8_t rfm12_tx(uint8_t len, uint8_t type, uint8_t *data);
 
 //if polling is used, define a polling function
 #if RFM12_USE_POLLING
-void rfm12_poll(void)
+void rfm12_poll(void);
 #endif
 
 
@@ -240,7 +240,7 @@ extern rfm12_control_t ctrl;
 	/** \returns STATUS_FREE or STATUS_COMPLETE
 	* \see \ref rxtx_states "rx buffer states", rfm12_rx_len(), rfm12_rx_type(), rfm12_rx_buffer(), rfm12_rx_clear() and rf_rx_buffer_t
 	*/
-	static inline uint8_t rfm12_rx_status()
+	static inline uint8_t rfm12_rx_status(void)
 	{
 		return ctrl.rf_buffer_out->status;
 	}
@@ -249,7 +249,7 @@ extern rfm12_control_t ctrl;
 	/** \returns The length of the data inside the buffer
 	* \see rfm12_rx_status(), rfm12_rx_type(), rfm12_rx_buffer(), rfm12_rx_clear() and rf_rx_buffer_t
 	*/
-	static inline uint8_t rfm12_rx_len()
+	static inline uint8_t rfm12_rx_len(void)
 	{
 		return ctrl.rf_buffer_out->len;
 	}
@@ -258,7 +258,7 @@ extern rfm12_control_t ctrl;
 	/** \returns The packet type from the packet header type field
 	* \see rfm12_rx_status(), rfm12_rx_len(), rfm12_rx_buffer(), rfm12_rx_clear() and rf_rx_buffer_t
 	*/
-	static inline uint8_t rfm12_rx_type()
+	static inline uint8_t rfm12_rx_type(void)
 	{
 		return ctrl.rf_buffer_out->type;
 	}
@@ -267,7 +267,7 @@ extern rfm12_control_t ctrl;
 	/** \returns A pointer to the current receive buffer contents
 	* \see rfm12_rx_status(), rfm12_rx_len(), rfm12_rx_type(), rfm12_rx_clear() and rf_rx_buffer_t
 	*/
-	static inline uint8_t *rfm12_rx_buffer()
+	static inline uint8_t *rfm12_rx_buffer(void)
 	{
 		return (uint8_t*) ctrl.rf_buffer_out->buffer;
 	}

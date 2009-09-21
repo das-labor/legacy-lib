@@ -339,7 +339,7 @@ ISR(RFM12_INT_VECT, ISR_NOBLOCK)
 * \warning Warning, if you do not call this function periodically, then no packet will get transmitted.
 * \see rfm12_tx() and rfm12_start_tx()
 */
-void rfm12_tick()
+void rfm12_tick(void)
 {	
 	//collision detection is enabled by default
 	#if !(RFM12_NOCOLLISIONDETECTION)
@@ -514,7 +514,7 @@ void
 #else
 uint8_t 
 #endif
-rfm12_tx ( uint8_t len, uint8_t type, uint8_t *data )
+rfm12_tx(uint8_t len, uint8_t type, uint8_t *data)
 {
 	#if RFM12_UART_DEBUG
 		uart_putstr ("sending packet\r\n");
@@ -545,7 +545,7 @@ rfm12_tx ( uint8_t len, uint8_t type, uint8_t *data )
 	* \see rfm12_rx_status(), rfm12_rx_len(), rfm12_rx_type(), rfm12_rx_buffer() and rf_rx_buffers
 	*/
 	//warning: without the attribute, gcc will inline this even if -Os is set
-	void __attribute__((noinline)) rfm12_rx_clear()
+	void __attribute__((noinline)) rfm12_rx_clear(void)
 	{
 			//mark the current buffer as empty
 			ctrl.rf_buffer_out->status = STATUS_FREE;
@@ -575,7 +575,7 @@ rfm12_tx ( uint8_t len, uint8_t type, uint8_t *data )
 * \note Please note that the transmit power and receive amplification values are currently hard coded.
 * Have a look into rfm12_hw.h for possible settings.
 */
-void rfm12_init()
+void rfm12_init(void)
 {
 	//initialize spi
 	SS_RELEASE();

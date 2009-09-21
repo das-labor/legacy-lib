@@ -208,10 +208,26 @@
 	* \todo Use power management shadow register if the wakeup timer feature is enabled.
 	* \see rfm12_tx_off() and rfm12_ask_tx_mode()
 	*/
-	static inline void rfm12_tx_on (void)
+	static inline void rfm12_tx_on(void)
 	{
 		/* set enable transmission bit now. */
 		rfm12_data(RFM12_CMD_PWRMGT | PWRMGT_DEFAULT | RFM12_PWRMGT_ET);
+	}
+	
+	
+	//! Set default power mode (usually transmitter off, receiver on).
+	/** This will usually stop a transmission.
+	* This function is used to emulate amplitude modulated signals.
+	*
+	* \note You need to define RFM12_TRANSMIT_ASK as 1 to enable this.
+	* \warning This will interfere with the wakeup timer feature.
+	* \todo Use power management shadow register if the wakeup timer feature is enabled.
+	* \see rfm12_tx_on() and rfm12_ask_tx_mode()
+	*/
+	static inline void rfm12_tx_off(void)
+	{
+		/* turn off everything. */
+		rfm12_data(RFM12_CMD_PWRMGT);
 	}
 #endif /* RFM12_TRANSMIT_ASK */
 
@@ -257,7 +273,7 @@
 	/** \returns One of these \ref batt_states "battery states" .
 	* \see rfm12_set_batt_detector() and the \ref batt_states "battery state" defines
 	*/
-	uint8_t rfm12_get_batt_status()
+	uint8_t rfm12_get_batt_status(void)
 	{
 		return ctrl.low_batt;
 	}
