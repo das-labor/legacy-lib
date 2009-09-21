@@ -93,6 +93,11 @@ uint8_t rfm12_start_tx(uint8_t type, uint8_t length);
 uint8_t rfm12_tx(uint8_t len, uint8_t type, uint8_t *data);
 #endif
 
+//if polling is used, define a polling function
+#if RFM12_USE_POLLING
+void rfm12_poll(void)
+#endif
+
 
 /************************
  * private control structs

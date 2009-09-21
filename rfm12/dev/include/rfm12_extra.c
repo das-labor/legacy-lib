@@ -197,6 +197,22 @@
 			ctrl.rfm12_state = STATE_RX_IDLE;
 		}
 	}
+	
+	
+	//! Enable the transmitter immediately (ASK transmission mode).
+	/** This will send out the current buffer contents.
+	* This function is used to emulate amplitude modulated signals.
+	*
+	* \note You need to define RFM12_TRANSMIT_ASK as 1 to enable this.
+	* \warning This will interfere with the wakeup timer feature.
+	* \todo Use power management shadow register if the wakeup timer feature is enabled.
+	* \see rfm12_tx_off() and rfm12_ask_tx_mode()
+	*/
+	static inline void rfm12_tx_on (void)
+	{
+		/* set enable transmission bit now. */
+		rfm12_data(RFM12_CMD_PWRMGT | PWRMGT_DEFAULT | RFM12_PWRMGT_ET);
+	}
 #endif /* RFM12_TRANSMIT_ASK */
 
 

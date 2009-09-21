@@ -190,8 +190,14 @@
 */
 
 //macros to turn the int on and off
-#define RFM12_INT_ON() RFM12_INT_MSK |= (1<<RFM12_INT_BIT)
-#define RFM12_INT_OFF() RFM12_INT_MSK &= ~(1<<RFM12_INT_BIT)
+//if polling is used, just define these macros as empty
+#if !(RFM12_USE_POLLING)
+	#define RFM12_INT_ON() RFM12_INT_MSK |= (1<<RFM12_INT_BIT)
+	#define RFM12_INT_OFF() RFM12_INT_MSK &= ~(1<<RFM12_INT_BIT)
+#else
+	#define RFM12_INT_ON()
+	#define RFM12_INT_OFF()
+#endif /* !(RFM12_USE_POLLING) */
 
 /*
  * the following macros help to manage the rfm12 fifo

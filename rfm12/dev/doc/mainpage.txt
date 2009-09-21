@@ -1,6 +1,6 @@
 /** \mainpage rfm12lib Library Documentation
  *
- * TODO: mention example project in test-m8 folder, write feature page, add picture of rfm12 with avr.
+ * TODO: write feature page, add picture of rfm12 with avr.
  * possibly also add a section about how the library works (refer to english wiki for nice example).
  *
  * \section intro_sec Introduction
@@ -38,7 +38,7 @@
  *  - An 8-bit (0..255) packet type or address field
  *  - Packet length up to 255 bytes
  *  - A simple header checksum
- * - Interrupt based packet transfer handling
+ * - Interrupt or polling based packet transfer handling
  * - Multiple frequency bands, depending on the used module (315, 433, 868 and 915 MHz)
  * - Collision avoidance (carrier sense)
  * - Usage of syncronization patterns to start data reception
@@ -100,6 +100,9 @@
  * - Check if a packet has been received via rfm12_rx_status()
  * - Read packet length, type and contents using rfm12_rx_len(), rfm12_rx_type(), rfm12_rx_buffer()
  * - Be sure to clear the received packet buffer after reading a packet by calling rfm12_rx_clear()
+ * - If you are using polling instead of the interrupt, you have to call rfm12_poll() periodically to transmit and receive packets. \n
+ *   rfm12_poll() has to be called a lot more often than rfm12_tick(), as it needs to fill or read the 1-byte FIFO of the RFM12 for every byte
+ *   in a transmission.
  *
  * Click the function name links to get to the documentation.
  *
@@ -119,6 +122,8 @@
  * \endcode
  *
  * There are several extra features. They are explained \ref extra_features "here".
+ *
+ * Some example projects for an ATmega8 can be found in the subdirectory <b>test-m8</b>.
  *
  * \section hard_sec Hardware
  *
@@ -270,6 +275,7 @@ nSEL            | Slave select pin defined below
  * #define RFM12_NOCOLLISIONDETECTION 0
  * #define RFM12_TRANSMIT_ONLY 0
  * #define RFM12_SPI_SOFTWARE 0
+ * #define RFM12_USE_POLLING 0
  * #define RFM12_RECEIVE_ASK 0
  * #define RFM12_TRANSMIT_ASK 0
  * #define RFM12_USE_WAKEUP_TIMER 0
@@ -289,6 +295,10 @@ nSEL            | Slave select pin defined below
  * from other transmitters on the selected frequency, collision avoidance would not work and is disabled in this case.
  *
  * Set \b RFM12_SPI_SOFTWARE to 1 if you wish to use software SPI instead of hardware SPI.
+ *
+ * Set \b RFM12_USE_POLLING to 1 in case you do not want to use an interrupt for packet handling. This will enable a function named rfm12_poll()
+ * which has to be called periodically to handle packet transfers. rfm12_poll() has to be called a lot more often than rfm12_tick(),
+ * as it needs to fill or read the 1-byte FIFO of the RFM12 for every byte in a transmission.
  *
  * Set \b RFM12_RECEIVE_ASK to 1 if you intend to receive ASK (amplitude shift keying) modulated data. Usually this module cannot do that,
  * but with some soldering and an extra ADC interrupt, you still can receive data from simple devices such as thermometers or wireless outlets,
