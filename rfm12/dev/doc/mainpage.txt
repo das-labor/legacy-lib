@@ -20,7 +20,7 @@
  * There are several suppliers of the RFM12. If you happen to live in germany and need low quantities, you could have a look
  * at the <a href="http://www.pollin.de/">pollin online store</a>, which sells them but tends to be expensive.
  * If you need quantities above 10 modules, you are advised to contact the manufacturer directly,
- * as they might be cheaper overall (including shipping). Otherwise, google is your friend.
+ * as they might be cheaper overall (including shipping). Otherwise, Google is your friend.
  *
  * The library and all its sources are licensed under the terms of the GPL version 2 or later.
  *
