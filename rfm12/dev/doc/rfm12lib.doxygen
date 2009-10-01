@@ -1311,8 +1311,9 @@ PREDEFINED             = __attribute__((noinline))= \
                          RFM12_LIVECTRL=1 \
                          RFM12_LOW_BATT_DETECTOR=1 \
                          RFM12_USE_WAKEUP_TIMER=1 \
-                         RFM12_RAW_TX=1 \
-                         RFM12_RECEIVE_CW=1
+                         RFM12_RECEIVE_ASK=1 \
+                         RFM12_TRANSMIT_ASK=1 \
+                         "ISR(RFM12_INT_VECT, ISR_NOBLOCK)=ISR(RFM12_INT_VECT, ISR_NOBLOCK)"
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then 
 # this tag can be used to specify a list of macro names that should be expanded. 

@@ -86,7 +86,7 @@
 	extern rfm12_rfrxbuf_t ask_rxbuf;
 	
 	//see rfm12_extra.c for more documentation	
-	void adc_init();
+	void adc_init(void);
 #endif /* RFM12_RECEIVE_ASK */
 
 

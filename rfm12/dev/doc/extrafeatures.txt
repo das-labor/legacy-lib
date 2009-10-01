@@ -27,6 +27,33 @@
  *
  * \section feature_ask_sec ASK Modulation Feature
  *
+ * Although the RF12 modules do not support ASK (amplitude shift keying) modulation natively
+ * it is still possible to emulate it in software. In contrast to FSK (frequency shift keying)
+ * where ones and zeroes are encoded using different frequencies, ASK encodes data using the
+ * amplitude of a radio signal. The following subsections explain how this library emulates
+ * ASK data transmission and reception.
+ *
+ * \subsection feature_ask_rx ASK Data Reception
+ *
+ * To decode ASK modulated data, one needs to measure the amplitude of a radio signal and
+ * map it to ones or zeroes. Luckily the RFM12 provides an analog RSSI (receive signal strength indicator) pin,
+ * which can be attached to the ADC of an AVR microcontroller in order to measure the signal strength.
+ * As the signal strength can be interpreted as the amplitude it is possible to decode an ASK signal
+ * by setting a threshold and mapping all signal strength measurements greater than that threshold to ones and the
+ * other ones to zero respectively. This library provides an ADC interrupt which is able to decode ASK signals.
+ *
+ * To use the ASK receive mode, just set RFM12_RECEIVE_ASK to 1 and call adc_init() at the beginning of your application.
+ * Received data is stored in ask_rxbuf (rfm12_rfrxbuf_t) and can be read if ask_rxbuf.state is set to RFM12_ASK_STATE_FULL.
+ * The received data is stored as pulse lengths in timer 0 counts inside ask_rxbuf. This way two or more consecutive ones or zeroes
+ * are interpreted as one longer pulse. As every transmission begins with a one (for technical reasons), all odd buffer array indices
+ * are pulse lengths of ones, while all even array indices are zeroes. This is due to the bit packing.
+ * Please note that you have to initialize timer 0 and probably adjust some values in the ADC interrupt service routine to
+ * fit your application.
+ *
+ * \subsection feature_ask_tx ASK Data Transmission
+ *
+ * 
+ * 
  * \section feature_wakeup_sec Wakeup Timer Feature
  *
  * The RF12 supports a wakeup timer mode that only consumes a few microamperes of power. This is useful if you want to save battery

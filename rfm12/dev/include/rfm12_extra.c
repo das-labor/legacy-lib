@@ -155,7 +155,7 @@
 	* \note You need to define RFM12_RECEIVE_ASK as 1 to enable this.
 	* \see ISR(ADC_vect, ISR_NOBLOCK) and rfm12_rfrxbuf_t
 	*/
-	void adc_init()
+	void adc_init(void)
 	{
 		ADMUX  = (1<<REFS0) | (1<<REFS1); //Internal 2.56V Reference, MUX0
 		
