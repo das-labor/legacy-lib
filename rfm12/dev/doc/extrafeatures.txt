@@ -45,8 +45,8 @@
  * To use the ASK receive mode, just set RFM12_RECEIVE_ASK to 1 and call adc_init() at the beginning of your application.
  * Received data is stored in ask_rxbuf (rfm12_rfrxbuf_t) and can be read if ask_rxbuf.state is set to RFM12_ASK_STATE_FULL.
  * The received data is stored as pulse lengths in timer 0 counts inside ask_rxbuf. This way two or more consecutive ones or zeroes
- * are interpreted as one longer pulse. As every transmission begins with a one (for technical reasons), all odd buffer array indices
- * are pulse lengths of ones, while all even array indices are zeroes. This is due to the bit packing.
+ * are interpreted as one longer pulse. As every transmission begins with a one (for technical reasons), all even buffer array indices
+ * are pulse lengths of ones, while all even odd indices are zeroes. This is due to the bit packing.
  * Please note that you have to initialize timer 0 and probably adjust some values in the ADC interrupt service routine to
  * fit your application.
  *

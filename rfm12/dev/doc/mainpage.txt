@@ -1,6 +1,6 @@
 /** \mainpage rfm12lib Library Documentation
  *
- * TODO: write feature page, add picture of rfm12 with avr.
+ * \image html avr_rfm12.png "rfm12lib"
  *
  * \section intro_sec Introduction
  *
