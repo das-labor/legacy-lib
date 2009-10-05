@@ -1,2 +1,2 @@
-This directory ("dev") contains highly experimental development
-stuff, which may not work. You have been warned.
+Visit http://www.das-labor.org/wiki/RFM12_library/en (english)
+or http://www.das-labor.org/wiki/RFM12_library (german)
