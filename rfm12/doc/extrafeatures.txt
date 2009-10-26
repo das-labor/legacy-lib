@@ -52,7 +52,18 @@
  *
  * \subsection feature_ask_tx ASK Data Transmission
  *
- * 
+ * ASK modulated data transmission is emulated by filling the RF12 transmit buffer with ones and turning the transmitter on and off.
+ * As the RF12 natively uses FSK modulation, the transmitter will generate a carrier signal when turned on and transmitting.
+ * Cheap ASK devices like radio controlled power outlets and the like will interprete the carrier signal as a one and no carrier signal as a zero.
+ * Unfortunately this library does not supply functions to transmit binary data, but supplies functions to control the transmitter and
+ * create ones and zeroes. Encoding data is left to the user.
+ *
+ * The ASK transmission feature is enabled by setting RFM12_TRANSMIT_ASK to 1. ASK transmit mode can be enabled with rfm12_ask_tx_mode(),
+ * while rfm12_tx_on() and rfm12_tx_off() control the transmitter to encode ones and zeroes.
+ *
+ * There are several web-resources in German language which explain the encoding used by radio controlled outlets:
+ * http://www.das-labor.org/wiki/Diskussion:Funkfernbedienung
+ * http://ethersex.de/index.php/HowToRFM12_ASK
  * 
  * \section feature_wakeup_sec Wakeup Timer Feature
  *
