@@ -85,7 +85,7 @@
  * #include "../rfm12lib/rfm12.c"
  * \endcode
  *
- * This way the configuration is correctly supplied to the library and you will only need to add rfm12.c to your makefile to compile the library.
+ * This way the configuration is correctly supplied to the library and you will only need to add rfm12.c to your makefile or project to compile the library.
  *
  * Finally, you just need to include your <b>%rfm12.h</b> to use the library!
  * 
