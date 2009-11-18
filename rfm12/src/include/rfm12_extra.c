@@ -187,6 +187,14 @@
 	{
 		if (setting)
 		{
+		#if 0
+			/* disable the receiver */
+			rfm12_data(RFM12_CMD_PWRMGT | PWRMGT_DEFAULT);
+
+			/* fill preamble into buffer */
+			rfm12_data(RFM12_CMD_TX | PREAMBLE);
+			rfm12_data(RFM12_CMD_TX | PREAMBLE);
+		#endif
 			ctrl.rfm12_state = STATE_TX;
 			RFM12_INT_OFF();
 		} else
@@ -208,10 +216,10 @@
 	* \todo Use power management shadow register if the wakeup timer feature is enabled.
 	* \see rfm12_tx_off() and rfm12_ask_tx_mode()
 	*/
-	static inline void rfm12_tx_on(void)
+	inline void rfm12_tx_on(void)
 	{
 		/* set enable transmission bit now. */
-		rfm12_data(RFM12_CMD_PWRMGT | PWRMGT_DEFAULT | RFM12_PWRMGT_ET);
+		rfm12_data(RFM12_CMD_PWRMGT | PWRMGT_DEFAULT | RFM12_PWRMGT_ET | RFM12_PWRMGT_ES | RFM12_PWRMGT_EX);
 	}
 	
 	
@@ -224,7 +232,7 @@
 	* \todo Use power management shadow register if the wakeup timer feature is enabled.
 	* \see rfm12_tx_on() and rfm12_ask_tx_mode()
 	*/
-	static inline void rfm12_tx_off(void)
+	inline void rfm12_tx_off(void)
 	{
 		/* turn off everything. */
 		rfm12_data(RFM12_CMD_PWRMGT);

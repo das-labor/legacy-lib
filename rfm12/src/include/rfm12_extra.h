@@ -100,11 +100,11 @@
 	
 	
 	//see rfm12_extra.c for more documentation
-	static inline void rfm12_tx_on(void);
+	inline void rfm12_tx_on(void);
 
 	
 	//see rfm12_extra.c for more documentation
-	static inline void rfm12_tx_off(void);
+	inline void rfm12_tx_off(void);
 #endif /* RFM12_TRANSMIT_ASK  */
 
 
