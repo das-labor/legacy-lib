@@ -65,6 +65,7 @@
 
 //frequency to use
 #define FREQ 433000000UL
+#define RFM12_BASEBAND RFM12_BAND_433
 
 //use this for datarates >= 2700 Baud
 #define DATARATE_VALUE RFM12_DATARATE_CALC_HIGH(9600.0)
