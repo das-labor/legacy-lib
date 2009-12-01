@@ -352,4 +352,5 @@ nSEL            | Slave select pin defined below
  * Thanks to Das LABOR for providing the great infrastructure and environment!
  *
  * Thanks to Alexander Krause for contributing a patch that allows frequency bands other than 433MHz to be used.
+ * Thanks to Mikl&oacute;s M&aacute;rton for contributing a fix to the test firmware.
  */
