@@ -165,7 +165,7 @@ ISR(RFM12_INT_VECT, ISR_NOBLOCK)
 	#endif /* RFM12_USE_WAKEUP_TIMER */
 	
 	//check if the fifo interrupt occurred
-	if((!status & (RFM12_STATUS_FFIT>>8)))
+	if(!(status & (RFM12_STATUS_FFIT>>8)))
 		goto END;
 	
 	//see what we have to do (start rx, rx or tx)
