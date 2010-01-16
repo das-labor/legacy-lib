@@ -438,34 +438,40 @@ can_message_raw * can_get_raw(){
 
 
 //marks a receive buffer as unused again so it can be overwritten in Interrupt
-void can_free_raw(can_message_raw * msg){
+void can_free_raw(can_message_raw * msg)
+{
 	can_message_x * msg_x = (can_message_x *) msg;
 	msg_x->flags = 0;
 }
 
 
 //returns pointer to the next can TX buffer
-can_message_raw * can_buffer_get_raw(){
+can_message_raw * can_buffer_get_raw()
+{
 	can_message_x *p;
 	p = &TX_BUFFER[TX_HEAD];
 	while (p->flags&0x01); //wait until buffer is free
-	if(++TX_HEAD == CAN_TX_BUFFER_SIZE) TX_HEAD = 0;
+	if (++TX_HEAD == CAN_TX_BUFFER_SIZE) TX_HEAD = 0;
 	return &(p->msg);
 }
 
 
 //start transmitting can messages, and mark message msg as transmittable
-void can_transmit_raw(can_message_raw* msg2){
-	can_message_x* msg=(can_message_x*) msg2;
-	if(msg){
+void can_transmit_raw(can_message_raw* msg2)
+{
+	can_message_x* msg = (can_message_x*) msg2;
+	if (msg)
+	{
 		msg->flags |= 0x01;
 	}
-	if(!TX_INT){
-		if(((can_message_x*)&TX_BUFFER[TX_TAIL])->flags & 0x01){
+	if (!TX_INT)
+	{
+		if (((can_message_x*)&TX_BUFFER[TX_TAIL])->flags & 0x01)
+		{
 			((can_message_x*)&TX_BUFFER[TX_TAIL])->flags &= ~0x01;
 			TX_INT = 1;
 			message_load(&TX_BUFFER[TX_TAIL]);
-			if(++TX_TAIL == CAN_TX_BUFFER_SIZE) TX_TAIL = 0;
+			if (++TX_TAIL == CAN_TX_BUFFER_SIZE) TX_TAIL = 0;
 		}
 	}
 }
@@ -474,18 +480,23 @@ void can_transmit_raw(can_message_raw* msg2){
 
 can_message_x RX_MESSAGE, TX_MESSAGE;
 
-can_message_raw * can_get_raw_nb(){
+can_message_raw * can_get_raw_nb()
+{
 	//check the pin, that the MCP's Interrup output connects to
-	if(SPI_REG_PIN_MCP_INT & (1<<SPI_PIN_MCP_INT)){
+	if (SPI_REG_PIN_MCP_INT & (1<<SPI_PIN_MCP_INT))
+	{
 		return 0;
-	}else{
+	}
+	else
+	{
 		//So the MCP Generates an RX Interrupt
 		message_fetch(&RX_MESSAGE);
 		return &(RX_MESSAGE.msg);
 	}
 }
 
-can_message_raw * can_get_raw(){
+can_message_raw * can_get_raw()
+{
 	//wait while the MCP doesn't generate an RX Interrupt
 	while(SPI_REG_PIN_MCP_INT & (1<<SPI_PIN_MCP_INT)) { };
 	
@@ -494,7 +505,8 @@ can_message_raw * can_get_raw(){
 }
 
 	//only for compatibility with Interrupt driven Version
-can_message_raw * can_buffer_get_raw(){
+can_message_raw * can_buffer_get_raw()
+{
 	return &(TX_MESSAGE.msg);
 }
 
