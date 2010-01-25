@@ -9,7 +9,7 @@
  */
 
 // send ping to dst
-void lap_ping( can_addr dst )
+void lap_ping(can_addr dst)
 {
 	pdo_message *msg = (pdo_message *)can_buffer_get();
 
@@ -20,11 +20,11 @@ void lap_ping( can_addr dst )
 	msg->dlc      = 1;
 	msg->cmd      = FKT_MGT_PING;
 
-	can_transmit( (can_message *)msg );
+	can_transmit((can_message *)msg);
 }
 
 // send reset request to dst
-void lap_reset( can_addr dst )
+void lap_reset(can_addr dst)
 {
 	pdo_message *msg = (pdo_message *)can_buffer_get();
 
@@ -35,7 +35,7 @@ void lap_reset( can_addr dst )
 	msg->dlc      = 1;
 	msg->cmd      = FKT_MGT_RESET;
 
-	can_transmit( (can_message *)msg );
+	can_transmit((can_message *)msg);
 }
 
 

@@ -426,14 +426,14 @@ can_message * can_get(){
 
 
 //marks a receive buffer as unused again so it can be overwritten in Interrupt
-void can_free(can_message * msg){
+void can_free(can_message * msg) {
 	can_message_x * msg_x = (can_message_x *) msg;
 	msg_x->flags = 0;
 }
 
 
 //returns pointer to the next can TX buffer
-can_message * can_buffer_get(){
+can_message *can_buffer_get() {
 	can_message_x *p;
 	p = &TX_BUFFER[TX_HEAD];
 	while (p->flags&0x01); //wait until buffer is free
@@ -464,33 +464,33 @@ can_message_x RX_MESSAGE, TX_MESSAGE;
 
 can_message * can_get_nb(){
 	//check the pin, that the MCP's Interrup output connects to
-	if(SPI_REG_PIN_MCP_INT & (1<<SPI_PIN_MCP_INT)){
+	if (SPI_REG_PIN_MCP_INT & (1<<SPI_PIN_MCP_INT)){
 		return 0;
-	}else{
+	} else {
 		//So the MCP Generates an RX Interrupt
 		message_fetch(&RX_MESSAGE);
 		return &(RX_MESSAGE.msg);
 	}
 }
 
-can_message * can_get(){
+can_message *can_get(){
 	//wait while the MCP doesn't generate an RX Interrupt
-	while(SPI_REG_PIN_MCP_INT & (1<<SPI_PIN_MCP_INT)) { };
+	while (SPI_REG_PIN_MCP_INT & (1<<SPI_PIN_MCP_INT)) { };
 	
 	message_fetch(&RX_MESSAGE);
 	return &(RX_MESSAGE.msg);
 }
 
 	//only for compatibility with Interrupt driven Version
-can_message * can_buffer_get(){
+can_message *can_buffer_get() {
 	return &(TX_MESSAGE.msg);
 }
 
-void can_transmit(can_message * msg){
+void can_transmit(can_message *msg) {
 	message_load((can_message_x*)msg);
 }
 
-void can_free(can_message * msg){
+void can_free(can_message *msg) {
 }
 
 #endif

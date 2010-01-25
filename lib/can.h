@@ -35,7 +35,7 @@ typedef struct{
 	can_port      port_dst;
 	unsigned char dlc;
 	unsigned char data[8];
-}can_message;
+} can_message;
 
 typedef struct
 {
@@ -73,8 +73,8 @@ void can_setled(unsigned char led, unsigned char state);
  * Sending
  */
 
-can_message * can_buffer_get();
-void can_transmit( can_message *msg );
+can_message *can_buffer_get();
+void can_transmit(can_message *msg);
 
 
 /*****************************************************************************
@@ -87,9 +87,9 @@ can_message *can_get_nb();
 // this is only needed for Interrupt driven Version
 #ifndef CAN_INTERRUPT
 // #  define can_free(m)
-  void can_free(can_message * msg);
+  void can_free(can_message *msg);
 #else
-  void can_free(can_message * msg);
+  void can_free(can_message *msg);
 #endif
 
 
@@ -97,8 +97,8 @@ can_message *can_get_nb();
  * Sending
  */
 
-can_message_raw * can_buffer_get_raw();
-void can_transmit_raw( can_message_raw *msg );
+can_message_raw *can_buffer_get_raw();
+void can_transmit_raw(can_message_raw *msg);
 
 
 /*****************************************************************************
@@ -111,9 +111,9 @@ can_message_raw *can_get_raw_nb();
 // this is only needed for Interrupt driven Version
 #ifndef CAN_INTERRUPT
 // #  define can_free(m)
-  void can_free_raw(can_message_raw * msg);
+  void can_free_raw(can_message_raw *msg);
 #else
-  void can_free_raw(can_message_raw * msg);
+  void can_free_raw(can_message_raw *msg);
 #endif
 
 
@@ -123,7 +123,7 @@ can_message_raw *can_get_raw_nb();
  * Sending
  */
 
-void can_transmit_v2( can_message_v2 *msg );
+void can_transmit_v2(can_message_v2 *msg);
 
 
 /*****************************************************************************
