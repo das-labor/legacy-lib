@@ -44,6 +44,7 @@
 //see rfm12_ctrl.c for more documentation
 void rfm12_set_rate (uint16_t in_datarate);
 void rfm12_set_frequency (uint16_t in_freq);
+void rfm12_set_tx_power (uint16_t txpower);
 #endif /* RFM12_LIVECTRL */
 
 #endif /* _RFM12_EXTRA_H */

@@ -30,6 +30,7 @@
  *
  * \note This file is included directly by rfm12.c, for performance reasons.
  * \todo Add more livectrl functions.
+ * \todo Add ANDs to parameter values
  */
  
 /******************************************************
@@ -63,5 +64,24 @@ void rfm12_set_rate (uint16_t in_datarate)
 void rfm12_set_frequency (uint16_t in_freq)
 {
 	rfm12_data(RFM12_CMD_FREQUENCY | in_freq );
+}
+
+//! Set the transmit power of the rf12.
+/** Extend docu here!
+*
+* Use this setting to reduce the transmit power of the device.
+* The following parameter values are possible:\n
+* - RFM12_TXCONF_POWER_0
+* - RFM12_TXCONF_POWER_2_5
+* - RFM12_TXCONF_POWER_5
+* - RFM12_TXCONF_POWER_7_5
+* - RFM12_TXCONF_POWER_10
+* - RFM12_TXCONF_POWER_12_5
+* - RFM12_TXCONF_POWER_15
+* - RFM12_TXCONF_POWER_17_5
+*/
+void rfm12_set_tx_power (uint16_t txpower)
+{
+	rfm12_data(RFM12_CMD_TXCONF | txpower | RFM12_TXCONF_FS_CALC(125000));
 }
 #endif
