@@ -56,7 +56,7 @@ static uint8_t spi_data(uint8_t c)
 
 //non-inlined version of rfm12_data
 //warning: without the attribute, gcc will inline this even if -Os is set
-void __attribute__ ((noinline)) rfm12_data(uint16_t d)
+/*void __attribute__ ((noinline)) rfm12_data(uint16_t d)
 {
 	SS_ASSERT();
 	#if !(RFM12_SPI_SOFTWARE)
@@ -71,12 +71,28 @@ void __attribute__ ((noinline)) rfm12_data(uint16_t d)
 	spi_data(d &  0xff);
 	#endif
 	SS_RELEASE();
+}*/
+
+
+void __attribute__ ((noinline)) rfm12_data(uint16_t d)
+{
+	//pull SS low and fill buffer with command MSB
+	SS_ASSERT();
+	UDR0 = d>>8;
+
+	//wait for buffer ready and fill
+	while ( !( UCSR0A & (1<<UDRE0)) );
+	SPDR = d & 0xff;
+	
+	//wait for tx complete and release slave
+	while ( !( UCSR0A & (1<<TXC0)) );
+	SS_RELEASE();
 }
 
 
 //non-inlined version of rfm12_read
 //warning: without the attribute, gcc will inline this even if -Os is set
-uint16_t __attribute__ ((noinline)) rfm12_read(uint16_t c)
+/*uint16_t __attribute__ ((noinline)) rfm12_read(uint16_t c)
 {
 	uint16_t retval;
 	SS_ASSERT();
@@ -96,13 +112,38 @@ uint16_t __attribute__ ((noinline)) rfm12_read(uint16_t c)
 	#endif
 	SS_RELEASE();
 	return retval;
+}*/
+
+
+uint16_t __attribute__ ((noinline)) rfm12_read(uint16_t c)
+{
+	uint16_t retval;
+
+	//pull SS low and fill buffer with command MSB
+	SS_ASSERT();
+	UDR0 = c >> 8;
+
+	//wait until rx is complete and store data MSB
+	while ( !(UCSR0A & (1<<RXC0)) );
+	retval = UDR0 << 8;
+
+	//fill buffer with command LSB
+	UDR0 = c & 0xff;
+
+	//wait until rx is complete and store data LSB
+	while ( !(UCSR0A & (1<<RXC0)) );
+	retval |= UDR0;
+
+	//release slave and return data
+	SS_RELEASE();
+	return retval;
 }
 
 
 /* @description reads the upper 8 bits of the status
  * register (the interrupt flags)
  */
- uint8_t rfm12_read_int_flags_inline()
+/*uint8_t rfm12_read_int_flags_inline()
 {
 	SS_ASSERT();
 	#if !(RFM12_SPI_SOFTWARE)
@@ -125,12 +166,27 @@ uint16_t __attribute__ ((noinline)) rfm12_read(uint16_t c)
 	SS_RELEASE();
 	return d;
 	#endif
+}*/
+
+
+uint8_t rfm12_read_int_flags_inline()
+{
+	//pull SS low and fill buffer
+	SS_ASSERT();
+	UDR0 = 0;
+
+	//wait until rx is complete
+	while ( !(UCSR0A & (1<<RXC0)) );
+
+	//release slave and return data
+	SS_RELEASE();
+	return UDR0;
 }
 
 
 /* @description inline version of rfm12_data for use in interrupt
  */
-void rfm12_data_inline(uint8_t cmd, uint8_t d)
+/*void rfm12_data_inline(uint8_t cmd, uint8_t d)
 {
 	SS_ASSERT();
 	#if !(RFM12_SPI_SOFTWARE)
@@ -145,11 +201,28 @@ void rfm12_data_inline(uint8_t cmd, uint8_t d)
 	spi_data( d   );
 	#endif
 	SS_RELEASE();
+}*/
+
+
+void rfm12_data_inline(uint8_t cmd, uint8_t d)
+{
+	//pull SS low and fill buffer
+	SS_ASSERT();
+	UDR0 = cmd;
+
+	//wait for buffer ready and fill
+	while ( !( UCSR0A & (1<<UDRE0)) );
+	UDR0 = d;
+
+	//wait for tx complete and release slave
+	while ( !( UCSR0A & (1<<TXC0)) );
+	SS_RELEASE();
 }
 
 
 /* @description inline function for reading the fifo
  */
+/*
 uint8_t rfm12_read_fifo_inline()
 {
 	SS_ASSERT();
@@ -172,8 +245,25 @@ uint8_t rfm12_read_fifo_inline()
 	SS_RELEASE();
 	return retval;
 	#endif
+}*/
+
+
+uint8_t rfm12_read_fifo_inline()
+{
+	//pull SS low and fill buffer
+	SS_ASSERT();
+	UDR0 =  ( RFM12_CMD_READ >> 8 );
+
+	//wait until rx is complete
+	while ( !(UCSR0A & (1<<RXC0)) );
+
+	//release slave and return data
+	SS_RELEASE();
+	return UDR0;
 }
 
+
+/*
 void spi_init()
 {
 	DDR_MOSI   |= (_BV(BIT_MOSI));
@@ -184,4 +274,25 @@ void spi_init()
 	#if !(RFM12_SPI_SOFTWARE)
 	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);//SPI Master, clk/16
 	#endif
+}*/
+
+
+void spi_init()
+{
+	//set baud rate to clk/16 (1MHz)
+	UBRR0 = 7;
+
+	//set XCK to output to enable master mode of operation
+	DDR_SCK    |= (_BV(BIT_SCK));
+
+	//configure remaining pins
+	DDR_MOSI   |= (_BV(BIT_MOSI));
+	DDR_MISO   &= ~(_BV(BIT_MISO));
+
+	//set USART to master spi mode, msb first, clock low when idle,
+	//sample data on leading clk edge
+	UCSR0C = _BV(UMSEL01) | _BV(UMSEL00);
+
+	//enable USART rx/tx in master spi mode
+	UCSR0B = _BV(RXEN0) | _BV(TXEN0);
 }
