@@ -76,16 +76,20 @@ static uint8_t spi_data(uint8_t c)
 
 void __attribute__ ((noinline)) rfm12_data(uint16_t d)
 {
-	//pull SS low and fill buffer with command MSB
 	SS_ASSERT();
+
+	while ( !( UCSR0A & (1<<UDRE0)) );
 	UDR0 = d>>8;
 
-	//wait for buffer ready and fill
-	while ( !( UCSR0A & (1<<UDRE0)) );
-	SPDR = d & 0xff;
+	//wait for tx complete and fill
+	while ( !( UCSR0A & (1<<RXC0)) );
+	uint8_t h = UDR0; // must clear UDR0 after each byte transferred
+	UDR0 = d & 0xff;
 	
 	//wait for tx complete and release slave
-	while ( !( UCSR0A & (1<<TXC0)) );
+	while ( !( UCSR0A & (1<<RXC0)) );
+	h = UDR0;
+
 	SS_RELEASE();
 }
 
@@ -121,13 +125,16 @@ uint16_t __attribute__ ((noinline)) rfm12_read(uint16_t c)
 
 	//pull SS low and fill buffer with command MSB
 	SS_ASSERT();
+	while ( !( UCSR0A & (1<<UDRE0)) );
 	UDR0 = c >> 8;
 
 	//wait until rx is complete and store data MSB
 	while ( !(UCSR0A & (1<<RXC0)) );
-	retval = UDR0 << 8;
+	retval = UDR0;
+	retval <<= 8;
 
 	//fill buffer with command LSB
+	while ( !( UCSR0A & (1<<UDRE0)) );
 	UDR0 = c & 0xff;
 
 	//wait until rx is complete and store data LSB
@@ -171,8 +178,11 @@ uint16_t __attribute__ ((noinline)) rfm12_read(uint16_t c)
 
 uint8_t rfm12_read_int_flags_inline()
 {
+	unsigned char x, d=d;
+
 	//pull SS low and fill buffer
 	SS_ASSERT();
+	while ( !( UCSR0A & (1<<UDRE0)) );
 	UDR0 = 0;
 
 	//wait until rx is complete
@@ -206,16 +216,22 @@ uint8_t rfm12_read_int_flags_inline()
 
 void rfm12_data_inline(uint8_t cmd, uint8_t d)
 {
-	//pull SS low and fill buffer
 	SS_ASSERT();
+
+	while ( !( UCSR0A & (1<<UDRE0)) );
+	UCSR0A |= (_BV(TXC0));
 	UDR0 = cmd;
 
 	//wait for buffer ready and fill
-	while ( !( UCSR0A & (1<<UDRE0)) );
+	while ( !( UCSR0A & (1<<TXC0)) );
+	UCSR0A |= (_BV(TXC0));
+	uint8_t h = UDR0; // must clear UDR0 after each byte transferred
 	UDR0 = d;
 
 	//wait for tx complete and release slave
 	while ( !( UCSR0A & (1<<TXC0)) );
+	h = UDR0; // must clear UDR0 after each byte transferred
+
 	SS_RELEASE();
 }
 
@@ -252,7 +268,14 @@ uint8_t rfm12_read_fifo_inline()
 {
 	//pull SS low and fill buffer
 	SS_ASSERT();
-	UDR0 =  ( RFM12_CMD_READ >> 8 );
+	while ( !( UCSR0A & (1<<UDRE0)) );
+	UDR0 = ( RFM12_CMD_READ >> 8 );
+
+	//wait until rx is complete
+	while ( !(UCSR0A & (1<<RXC0)) );
+	//wait for buffer ready and initiate rx
+	while ( !( UCSR0A & (1<<UDRE0)) );
+	UDR0 = 0;
 
 	//wait until rx is complete
 	while ( !(UCSR0A & (1<<RXC0)) );
@@ -279,15 +302,15 @@ void spi_init()
 
 void spi_init()
 {
-	//set baud rate to clk/16 (1MHz)
-	UBRR0 = 7;
+	//the baud rate register must be zero when the transmitter is enabled
+	UBRR0 = 0;
 
 	//set XCK to output to enable master mode of operation
-	DDR_SCK    |= (_BV(BIT_SCK));
+	DDR_SCK |= (_BV(BIT_SCK));
 
 	//configure remaining pins
-	DDR_MOSI   |= (_BV(BIT_MOSI));
-	DDR_MISO   &= ~(_BV(BIT_MISO));
+	DDR_MOSI |= (_BV(BIT_MOSI));
+	DDR_MISO &= ~(_BV(BIT_MISO));
 
 	//set USART to master spi mode, msb first, clock low when idle,
 	//sample data on leading clk edge
@@ -295,4 +318,7 @@ void spi_init()
 
 	//enable USART rx/tx in master spi mode
 	UCSR0B = _BV(RXEN0) | _BV(TXEN0);
+
+	//set baud rate to clk/16 (1MHz)
+	UBRR0 = 1;
 }
