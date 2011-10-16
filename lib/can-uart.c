@@ -115,6 +115,11 @@ rs232can_msg * canu_get_nb(){
 				canu_rcvstate = STATE_START;
 				break;
 			}
+			else if(canu_rcvlen = 0)
+			{
+				canu_rcvstate = STATE_START;
+				return &canu_rcvpkt;
+			}
 			canu_rcvstate     = STATE_PAYLOAD;
 			canu_rcvpkt.len   = (unsigned char)c;
 			uartpkt_data      = &canu_rcvpkt.data[0];
