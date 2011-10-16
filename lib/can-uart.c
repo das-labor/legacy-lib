@@ -19,12 +19,40 @@
  * Global variables
  */
 
-typedef enum {STATE_START, STATE_LEN, STATE_PAYLOAD} canu_rcvstate_t;
+typedef enum {STATE_START, STATE_LEN, STATE_PAYLOAD, STATE_CRC} canu_rcvstate_t;
 
 rs232can_msg	canu_rcvpkt;
 canu_rcvstate_t	canu_rcvstate = STATE_START;
 unsigned char 	canu_rcvlen   = 0;
+unsigned int	crc;
 
+unsigned int crc16_update(unsigned int crc, unsigned char a)
+{
+	int i;
+
+	crc ^= a;
+	for (i = 0; i < 8; ++i)
+	{
+		if (crc & 1)
+			crc = (crc >> 1) ^ 0xA001;
+		else
+			crc = (crc >> 1);
+	}
+
+	return crc & 0xFFFF;
+}
+
+unsigned int crc16(char* buf, unsigned int len)
+{
+	char i;
+	unsigned int crc;
+
+	for (i=0, crc = 0; i<len; i++) {
+		crc = crc16_update(crc, *buf);
+	
+	return crc;
+}
+    
 
 /*****************************************************************************
  * Connection management
@@ -95,13 +123,19 @@ rs232can_msg * canu_get_nb(){
 			if(canu_rcvlen--){
 				*(uartpkt_data++) = c;
 			} else {
-				canu_rcvstate = STATE_START;
-				//check CRC
-				if(c == 0x23){ // XXX CRC
-					return &canu_rcvpkt;
-				}
+				canu_rcvstate = STATE_CRC;
+				crc = c;
 			}
 			break;
+		case STATE_CRC:
+			canu_rcvstate = STATE_START;
+			crc <<= 8;
+			crc |= c;
+			if(crc == crc16(uartpkt_data, canu_rcvpkt.len )
+				return &canu_rcvpkt;
+			
+			break;
+
 		}
 	}
 
