@@ -48,7 +48,7 @@ unsigned int crc16(char* buf, unsigned int len)
 	unsigned int crc;
 
 	for (i=0, crc = 0; i<len; i++)
-		crc = crc16_update(crc, *buf);
+		crc = crc16_update(crc, *buf++);
 	
 	return crc;
 }
