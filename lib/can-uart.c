@@ -42,7 +42,7 @@ unsigned int crc16_update(unsigned int crc, unsigned char a)
 	return crc & 0xFFFF;
 }
 
-unsigned int crc16(char* buf, unsigned int len)
+unsigned int crc16(unsigned char* buf, unsigned int len)
 {
 	char i;
 	unsigned int crc;
@@ -138,9 +138,9 @@ rs232can_msg * canu_get_nb(){
 			crc <<= 8;
 			crc |= c;
 			#ifdef DEBUG
-			printf("canu_get_nb crc: 0x%04x, 0x%04x\n", crc, crc16(uartpkt_data, canu_rcvpkt.len));
+			printf("canu_get_nb crc: 0x%04x, 0x%04x\n", crc, crc16(&canu_rcvpkt.data[0], canu_rcvpkt.len));
 			#endif
-			if(crc == crc16(uartpkt_data, canu_rcvpkt.len))
+			if(crc == crc16(&canu_rcvpkt.data[0], canu_rcvpkt.len))
 				return &canu_rcvpkt;
 			
 			break;
