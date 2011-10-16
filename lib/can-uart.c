@@ -95,7 +95,7 @@ void canu_free(rs232can_msg *rmsg)
 // Returns Message or 0 if there is no complete message.
 rs232can_msg * canu_get_nb(){
 	static char *uartpkt_data;
-	char c;
+	unsigned char c;
 	
 	while (uart_getc_nb(&c)) {
 		#ifdef DEBUG
@@ -130,7 +130,7 @@ rs232can_msg * canu_get_nb(){
 				*(uartpkt_data++) = c;
 			} else {
 				canu_rcvstate = STATE_CRC;
-				crc = c & 0xFF;
+				crc = c;
 			}
 			break;
 		case STATE_CRC:
