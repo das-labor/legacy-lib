@@ -131,6 +131,9 @@ rs232can_msg * canu_get_nb(){
 			canu_rcvstate = STATE_START;
 			crc <<= 8;
 			crc |= c;
+			#ifdef DEBUG
+			printf("canu_get_nb crc: 0x%04x, 0x%04x\n", crc, crc16(uartpkt_data, canu_rcvpkt.len));
+			#endif
 			if(crc == crc16(uartpkt_data, canu_rcvpkt.len))
 				return &canu_rcvpkt;
 			
