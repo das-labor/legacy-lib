@@ -130,7 +130,7 @@ rs232can_msg * canu_get_nb(){
 				*(uartpkt_data++) = c;
 			} else {
 				canu_rcvstate = STATE_CRC;
-				crc = c;
+				crc = c & 0xFF;
 			}
 			break;
 		case STATE_CRC:
