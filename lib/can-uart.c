@@ -8,12 +8,7 @@
 #include "can.h"
 #include "can-uart.h"
 #include "can-encap.h"
-
-#ifdef UART_HOST
 #include "uart-host.h"
-#else
-#include "uart.h"
-#endif
 
 /*****************************************************************************
  * Global variables
@@ -49,10 +44,10 @@ unsigned int crc16(unsigned char* buf, unsigned int len)
 
 	for (i=0, crc = 0; i<len; i++)
 		crc = crc16_update(crc, *buf++);
-	
+
 	return crc;
 }
-    
+
 
 /*****************************************************************************
  * Connection management
@@ -67,7 +62,7 @@ void canu_init(char *serial)
 
 // syncronize line
 void canu_reset()
-{  
+{
 	unsigned char i;
 	for(i=RS232CAN_MAXLENGTH+3; i>0; i--)
 		uart_putc( (char)0x00 );
@@ -96,7 +91,7 @@ void canu_free(rs232can_msg *rmsg)
 rs232can_msg * canu_get_nb(){
 	static char *uartpkt_data;
 	unsigned char c;
-	
+
 	while (uart_getc_nb(&c)) {
 		#ifdef DEBUG
 		printf("canu_get_nb received: %02x\n", c);
@@ -142,7 +137,7 @@ rs232can_msg * canu_get_nb(){
 			#endif
 			if(crc == crc16(&canu_rcvpkt.data[0], canu_rcvpkt.len))
 				return &canu_rcvpkt;
-			
+
 			break;
 
 		}
@@ -151,7 +146,6 @@ rs232can_msg * canu_get_nb(){
 	return NULL;
 }
 
-#ifdef UART_HOST
 rs232can_msg * canu_get(){
 	int ret;
 	fd_set rset;
@@ -169,17 +163,6 @@ rs232can_msg * canu_get(){
 			return rmsg;
 	}
 }
-#else
-rs232can_msg * canu_get() {
-	rs232can_msg *rmsg;
-
-	for(;;) {
-		rmsg = canu_get_nb();
-		if (rmsg)
-			return rmsg;
-	}
-}
-#endif
 
 
 /*****************************************************************************
