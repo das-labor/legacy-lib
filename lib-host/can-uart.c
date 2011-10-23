@@ -9,6 +9,7 @@
 #include "can-uart.h"
 #include "can-encap.h"
 #include "uart-host.h"
+#include "crc16.h"
 
 /*****************************************************************************
  * Global variables
@@ -20,33 +21,6 @@ rs232can_msg	canu_rcvpkt;
 canu_rcvstate_t	canu_rcvstate = STATE_START;
 unsigned char 	canu_rcvlen   = 0;
 unsigned int	crc;
-
-unsigned int crc16_update(unsigned int crc, unsigned char a)
-{
-	int i;
-
-	crc ^= a;
-	for (i = 0; i < 8; ++i)
-	{
-		if (crc & 1)
-			crc = (crc >> 1) ^ 0xA001;
-		else
-			crc = (crc >> 1);
-	}
-
-	return crc & 0xFFFF;
-}
-
-unsigned int crc16(unsigned char* buf, unsigned int len)
-{
-	char i;
-	unsigned int crc;
-
-	for (i=0, crc = 0; i<len; i++)
-		crc = crc16_update(crc, *buf++);
-
-	return crc;
-}
 
 
 /*****************************************************************************
@@ -88,58 +62,58 @@ void canu_free(rs232can_msg *rmsg)
  */
 
 // Returns Message or 0 if there is no complete message.
-rs232can_msg * canu_get_nb(){
+rs232can_msg * canu_get_nb()
+{
 	static char *uartpkt_data;
 	unsigned char c;
 
-	while (uart_getc_nb(&c)) {
+	while (uart_getc_nb(&c))
+	{
 		#ifdef DEBUG
 		printf("canu_get_nb received: %02x\n", c);
 		#endif
-		switch (canu_rcvstate) {
-		case STATE_START:
-			if (c) {
-				canu_rcvstate = STATE_LEN;
-				canu_rcvpkt.cmd = c;
-			}
-			break;
-		case STATE_LEN:
-			canu_rcvlen       = (unsigned char)c;
-			if(canu_rcvlen > RS232CAN_MAXLENGTH)
-			{
-				canu_rcvstate = STATE_START;
+		
+		switch (canu_rcvstate)
+		{
+			case STATE_START:
+				if (c)
+				{
+					canu_rcvstate = STATE_LEN;
+					canu_rcvpkt.cmd = c;
+				}
 				break;
-			}
-			else if(canu_rcvlen == 0)
-			{
+			case STATE_LEN:
+				canu_rcvlen       = (unsigned char)c;
+				if(canu_rcvlen > RS232CAN_MAXLENGTH)
+				{
+					canu_rcvstate = STATE_START;
+					break;
+				}
+				canu_rcvstate     = STATE_PAYLOAD;
+				canu_rcvpkt.len   = (unsigned char)c;
+				uartpkt_data      = &canu_rcvpkt.data[0];
+				break;
+			case STATE_PAYLOAD:
+				if(canu_rcvlen--)
+					*(uartpkt_data++) = c;
+				else
+				{
+					canu_rcvstate = STATE_CRC;
+					crc = c;
+				}
+				break;
+			case STATE_CRC:
 				canu_rcvstate = STATE_START;
-				canu_rcvpkt.len = 0;
-				return &canu_rcvpkt;
-			}
-			canu_rcvstate     = STATE_PAYLOAD;
-			canu_rcvpkt.len   = (unsigned char)c;
-			uartpkt_data      = &canu_rcvpkt.data[0];
-			break;
-		case STATE_PAYLOAD:
-			if(canu_rcvlen--){
-				*(uartpkt_data++) = c;
-			} else {
-				canu_rcvstate = STATE_CRC;
-				crc = c;
-			}
-			break;
-		case STATE_CRC:
-			canu_rcvstate = STATE_START;
-			crc <<= 8;
-			crc |= c;
-			#ifdef DEBUG
-			printf("canu_get_nb crc: 0x%04x, 0x%04x\n", crc, crc16(&canu_rcvpkt.data[0], canu_rcvpkt.len));
-			#endif
-			if(crc == crc16(&canu_rcvpkt.data[0], canu_rcvpkt.len))
-				return &canu_rcvpkt;
+				crc = (crc << 8) | c;
+				
+				#ifdef DEBUG
+				printf("canu_get_nb crc: 0x%04x, 0x%04x\n", crc, crc16(&canu_rcvpkt.cmd, canu_rcvpkt.len + 2);
+				#endif
+				
+				if(crc == crc16(&canu_rcvpkt.cmd, canu_rcvpkt.len + 2))
+					return &canu_rcvpkt;
 
-			break;
-
+				break;
 		}
 	}
 
