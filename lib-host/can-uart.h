@@ -12,7 +12,7 @@
 
 //the threshold that has to be exceeded to cause a resync procedure
 //(if canu_failcnt > CANU_FAILTHRESH then resync)
-#define CANU_FAILTHRESH 1;
+#define CANU_FAILTHRESH 1
 extern unsigned int canu_failcnt;
 
 /*****************************************************************************
