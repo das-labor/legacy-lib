@@ -37,7 +37,7 @@ void canu_init(char *serial)
 void canu_reset()
 {
 	unsigned char i;
-	for(i=RS232CAN_MAXLENGTH+4; i>0; i--)
+	for(i=sizeof(rs232can_msg)+2; i>0; i--)
 		uart_putc( (char)0x00 );
 }
 
