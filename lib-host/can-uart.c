@@ -37,7 +37,7 @@ void canu_init(char *serial)
 void canu_reset()
 {
 	unsigned char i;
-	for(i=RS232CAN_MAXLENGTH+3; i>0; i--)
+	for(i=RS232CAN_MAXLENGTH+4; i>0; i--)
 		uart_putc( (char)0x00 );
 }
 
@@ -83,14 +83,14 @@ rs232can_msg * canu_get_nb()
 				}
 				break;
 			case STATE_LEN:
-				canu_rcvlen       = (unsigned char)c;
+				canu_rcvlen       = c;
 				if(canu_rcvlen > RS232CAN_MAXLENGTH)
 				{
 					canu_rcvstate = STATE_START;
 					break;
 				}
 				canu_rcvstate     = STATE_PAYLOAD;
-				canu_rcvpkt.len   = (unsigned char)c;
+				canu_rcvpkt.len   = c;
 				uartpkt_data      = &canu_rcvpkt.data[0];
 				break;
 			case STATE_PAYLOAD:
