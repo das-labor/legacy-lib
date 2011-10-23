@@ -20,7 +20,6 @@ typedef enum {STATE_START, STATE_LEN, STATE_PAYLOAD, STATE_CRC} canu_rcvstate_t;
 rs232can_msg	canu_rcvpkt;
 canu_rcvstate_t	canu_rcvstate = STATE_START;
 unsigned char 	canu_rcvlen   = 0;
-unsigned int	crc;
 
 
 /*****************************************************************************
@@ -65,6 +64,7 @@ void canu_free(rs232can_msg *rmsg)
 rs232can_msg * canu_get_nb()
 {
 	static char *uartpkt_data;
+	static unsigned int	crc;
 	unsigned char c;
 
 	while (uart_getc_nb(&c))
@@ -146,12 +146,14 @@ void canu_transmit(rs232can_msg *msg)
 {
 	char *ptr = (char *)msg;
 	unsigned char i;
+	unsigned int crc = crc16(&msg->cmd, msg->len + 2);
 
 	for (i=0; i<msg->len+2; i++) {
 		uart_putc( *ptr++);
 	}
 
-	uart_putc(0x23);		// XXX CRC
+	uart_putc(crc >> 8);
+	uart_putc(crc & 0xFF);
 }
 
 
