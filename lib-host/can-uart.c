@@ -72,7 +72,7 @@ rs232can_msg * canu_get_nb()
 		#ifdef DEBUG
 		printf("canu_get_nb received: %02x\n", c);
 		#endif
-		
+
 		switch (canu_rcvstate)
 		{
 			case STATE_START:
@@ -105,11 +105,11 @@ rs232can_msg * canu_get_nb()
 			case STATE_CRC:
 				canu_rcvstate = STATE_START;
 				crc = (crc << 8) | c;
-				
+
 				#ifdef DEBUG
 				printf("canu_get_nb crc: 0x%04x, 0x%04x\n", crc, crc16(&canu_rcvpkt.cmd, canu_rcvpkt.len + 2);
 				#endif
-				
+
 				if(crc == crc16(&canu_rcvpkt.cmd, canu_rcvpkt.len + 2))
 					return &canu_rcvpkt;
 
