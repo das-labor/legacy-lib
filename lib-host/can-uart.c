@@ -163,4 +163,15 @@ void canu_transmit(rs232can_msg *msg)
 	uart_putc(crc & 0xFF);
 }
 
+void canu_transmit_cmd(unsigned char cmd)
+{
+	unsigned int crc;
 
+	crc = crc16_update(0, cmd);
+	crc = crc16_update(crc, 0);
+
+	uart_putc(cmd);
+	uart_putc(0);
+	uart_putc(crc >> 8);
+	uart_putc(crc & 0xFF);
+}

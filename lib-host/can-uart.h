@@ -48,5 +48,6 @@ rs232can_msg *canu_get();
  * transmit
  */
 void canu_transmit(rs232can_msg *msg);
+void canu_transmit_cmd(unsigned char cmd);
 
 #endif
