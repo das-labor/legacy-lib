@@ -33,7 +33,7 @@ void canu_init(char *serial)
 	canu_reset();
 }
 
-// syncronize line
+// synchronize line
 void canu_reset()
 {
 	unsigned char i;
