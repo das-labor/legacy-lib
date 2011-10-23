@@ -4,7 +4,7 @@
 /*****************************************************************************
  * Simple CAN Library
  *
- * #define CAN_INTERRUPT 1	//set this to enable interrupt driven 
+ * #define CAN_INTERRUPT 1	//set this to enable interrupt driven
  *                                and buffering version
  * #define CAN_RX_BUFFER_SIZE 2	//only used for Interrupt
  * #define CAN_TX_BUFFER_SIZE 2	//only used for Interrupt
@@ -13,7 +13,7 @@
 /*****************************************************************************
  * Types
  */
- 
+
  #include <stdint.h>
 
 typedef unsigned char can_addr;
@@ -75,6 +75,10 @@ void can_setled(unsigned char led, unsigned char state);
 
 can_message *can_buffer_get();
 void can_transmit(can_message *msg);
+
+#ifdef POSIX
+void can_transmit_raw_gateway_message(rs232can_msg *rmsg);
+#endif
 
 
 /*****************************************************************************
