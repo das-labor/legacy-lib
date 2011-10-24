@@ -77,7 +77,7 @@ can_message *can_buffer_get();
 void can_transmit(can_message *msg);
 
 #ifdef POSIX
-void can_transmit_raw_gateway_message(rs232can_msg *rmsg);
+	void can_transmit_raw_gateway_message(rs232can_msg *rmsg);
 #endif
 
 
@@ -120,8 +120,9 @@ can_message_raw *can_get_raw_nb();
   void can_free_raw(can_message_raw *msg);
 #endif
 
-
-
+#ifdef POSIX
+	can_get_raw_gateway_message_nb
+#endif
 
 /*****************************************************************************
  * Sending
