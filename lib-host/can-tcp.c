@@ -90,6 +90,7 @@ cann_conn_t *cann_connect(char *server, int port)
 	int ret;
 	cann_conn_t *client;
 	struct sockaddr_in addr;
+	struct in_addr *server_addr;
 
 	// initialize client struct
 	client = malloc(sizeof(cann_conn_t));
@@ -107,8 +108,12 @@ cann_conn_t *cann_connect(char *server, int port)
 	ret = client->fd = socket(AF_INET, SOCK_STREAM, 0);
 	debug_assert(ret >= 0, "Could not open socket: ");
 
+	// resolve hostname
+	server_addr = atoaddr(server);
+	debug_assert(server_addr == NULL, "Could not resolve hostname");
+
 	// connect
-	memcpy(&(addr.sin_addr), atoaddr(server), sizeof(in_addr_t));
+	memcpy(&(addr.sin_addr), server_addr, sizeof(in_addr_t));
 	addr.sin_port = htons(port);
 	addr.sin_family = AF_INET;
 
@@ -255,13 +260,8 @@ cann_conn_t *cann_activity(fd_set *set)
 rs232can_msg *cann_buffer_get()
 {
 	rs232can_msg *cmsg = malloc(sizeof(rs232can_msg));
-	if (cmsg == NULL)
-	{
-		debug(0, "cann_buffer_get malloc fail!\n");
-		exit(EXIT_FAILURE);
-	}
-	else
-		return cmsg;
+	debug_assert(cmsg == NULL, "cann_buffer_get malloc fail!\n");
+	return cmsg;
 }
 
 void cann_free(rs232can_msg *rmsg)

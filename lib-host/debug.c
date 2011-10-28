@@ -45,7 +45,7 @@ void debug( int level, char *format, ... )
 	if (debug_level < level) {
 		return;
 	}
-	
+
 	print_time();
 
 	if (level == 0)
@@ -64,7 +64,7 @@ void debug_perror( int level, char *format, ... )
 
 	if (debug_level < level)
 		return;
-		
+
 	print_time();
 
 	if (level == 0)
@@ -87,7 +87,7 @@ void debug_assert( int test, char *format, ... )
 		return;
 
 	va_list ap;
-	
+
 	print_time();
 
 	va_start(ap, format);
@@ -96,13 +96,13 @@ void debug_assert( int test, char *format, ... )
 	fprintf(debugFP, " (%s)\n", strerror(errno));
 	va_end(ap);
 	fflush(debugFP);
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 void debug_assert2(char *format, ... )
 {
 	va_list ap;
-	
+
 	print_time();
 
 	va_start(ap, format);
@@ -111,6 +111,6 @@ void debug_assert2(char *format, ... )
 	fprintf(debugFP, " (%s)\n", strerror(errno));
 	va_end(ap);
 	fflush(debugFP);
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
