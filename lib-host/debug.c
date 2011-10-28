@@ -7,12 +7,16 @@
 
 #include "debug.h"
 
+int debug_time = 0;
 int debug_level  = 0;
 int debug_syslog = 0;
 FILE *debugFP;
 
 void print_time()
 {
+	if(debug_time == 0)
+		return;
+
 	time_t t = time(NULL);
 	char *tbuf = ctime(&t);
 	tbuf[strlen(tbuf)-1] = 0;
@@ -27,6 +31,7 @@ void debug_init(char* debugfile)
 			printf("Failed to open Debuglogfile\n");
 			exit(EXIT_FAILURE);
 		}
+		debug_time = 1;
 	}
 	else
 		debugFP = stderr;
@@ -35,7 +40,10 @@ void debug_init(char* debugfile)
 void debug_close()
 {
 	if (debugFP != NULL)
+	{
+		fflush(debugFP);
 		fclose(debugFP);
+	}
 }
 
 void debug( int level, char *format, ... )
