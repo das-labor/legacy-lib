@@ -17,7 +17,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "cann.h"
+#include "can-tcp.h"
 #include "debug.h"
 
 int listen_socket;
