@@ -1,10 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef DEBUG
-#include <stdio.h>
-#endif
-
 #include "debug.h"
 #include "can.h"
 #include "can-uart.h"
@@ -71,10 +67,7 @@ rs232can_msg * canu_get_nb()
 
 	while (uart_getc_nb(&c))
 	{
-		#ifdef DEBUG
-		printf("canu_get_nb received: %02x\n", c);
-		#endif
-
+		debug(10, "canu_get_nb received: %02x\n", c);
 		switch (canu_rcvstate)
 		{
 			case STATE_START:
@@ -110,10 +103,7 @@ rs232can_msg * canu_get_nb()
 				canu_rcvstate = STATE_START;
 				crc = (crc << 8) | c;
 
-				#ifdef DEBUG
-				printf("canu_get_nb crc: 0x%04x, 0x%04x\n", crc, crc16(&canu_rcvpkt.cmd, canu_rcvpkt.len + 2);
-				#endif
-
+				debug(10, "canu_get_nb crc: 0x%04x, 0x%04x\n", crc, crc16(&canu_rcvpkt.cmd, canu_rcvpkt.len + 2));
 				if(crc == crc16(&canu_rcvpkt.cmd, canu_rcvpkt.len + 2))
 				{
 					canu_failcnt = 0;
