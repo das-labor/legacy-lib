@@ -5,6 +5,7 @@
 #include <stdio.h>
 #endif
 
+#include "debug.h"
 #include "can.h"
 #include "can-uart.h"
 #include "can-encap.h"
