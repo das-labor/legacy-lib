@@ -110,7 +110,7 @@ cann_conn_t *cann_connect(char *server, int port)
 
 	// resolve hostname
 	server_addr = atoaddr(server);
-	debug_assert(server_addr == NULL, "Could not resolve hostname");
+	debug_assert(server_addr != NULL, "Could not resolve hostname");
 
 	// connect
 	memcpy(&(addr.sin_addr), server_addr, sizeof(in_addr_t));
