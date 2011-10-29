@@ -1,5 +1,5 @@
 
-#include "prng.h"
+#include "lib/prng.h"
 #include "pixel.h"
 #include "util.h"
 
@@ -12,14 +12,14 @@ void snake(){
 	pixel pixels[64];
 	pixels[0] = (pixel){NUM_COLS/2, NUM_ROWS/2};
 	pixels[1] = (pixel){NUM_COLS/2, (NUM_ROWS/2)-1};
-	
+
 	pixel * head = &pixels[1];
 	pixel * tail = &pixels[0];
 	pixel old_head;
 
 	pixel apples[10];
 	unsigned char apple_num = 0;
-	
+
 	direction dir = up;
 
 	clear_screen(0);
@@ -29,9 +29,9 @@ void snake(){
 		x++;
 		old_head = *head;
 		if(++head == pixels + 64) head = pixels;
-		
+
 		unsigned char dead_cnt=0;
-		
+
 		unsigned char apple_found = 0, j;
 		for(j=0;j<apple_num;j++){
 			unsigned char i;
@@ -50,7 +50,7 @@ void snake(){
 		apple_se:
 
 		if(apple_found){
-		
+
 		}else{
 			while(get_next_pixel(old_head, dir)){
 				if((dead_cnt++)==4){
@@ -64,7 +64,7 @@ void snake(){
 		if(!dead){
 			*head = next_pixel(old_head, dir);
 			setpixel(*head, 3);
-		
+
 			if((RANDOM8()&0xff)<80){
 				unsigned char j;
 				unsigned char nextapple=0, distx, disty, shortdist=255, xy=0;
@@ -115,7 +115,7 @@ void snake(){
 			}
 			break;
 		}
-		
+
 		for(j=0;j<apple_num;j++){
 			if(x%2){
 				setpixel(apples[j], 3);
@@ -123,7 +123,7 @@ void snake(){
 				clearpixel(apples[j]);
 			}
 		}
-		
+
 		wait (SNAKE_DELAY);
 	}
 }
