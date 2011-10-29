@@ -105,7 +105,7 @@ void debug_assert( int test, char *format, ... )
 	va_end(ap);
 
 	print_time();
-	fprintf(debugFP, "Exiting..\n");
+	fprintf(debugFP, "debug_assert(..) failed, exiting..\n");
 	debug_close();
 	exit(EXIT_FAILURE);
 }
@@ -123,7 +123,7 @@ void debug_assert2(char *format, ... )
 	va_end(ap);
 
 	print_time();
-	fprintf(debugFP, "Exiting..\n");
+	fprintf(debugFP, "debug_assert2(..) failed, exiting..\n");
 	debug_close();
 	exit(EXIT_FAILURE);
 }
