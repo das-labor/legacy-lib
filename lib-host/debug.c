@@ -124,7 +124,7 @@ void debug_assert2(char *format, ... )
 
 	print_time();
 	fprintf(debugFP, "Exiting..\n");
-	debug_close()
+	debug_close();
 	exit(EXIT_FAILURE);
 }
 
