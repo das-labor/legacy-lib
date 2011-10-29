@@ -103,7 +103,10 @@ void debug_assert( int test, char *format, ... )
 	vfprintf(debugFP, format, ap);
 	fprintf(debugFP, " (%s)\n", strerror(errno));
 	va_end(ap);
-	fflush(debugFP);
+
+	print_time();
+	fprintf(debugFP, "Exiting..\n");
+	debug_close();
 	exit(EXIT_FAILURE);
 }
 
@@ -118,7 +121,10 @@ void debug_assert2(char *format, ... )
 	vfprintf(debugFP, format, ap);
 	fprintf(debugFP, " (%s)\n", strerror(errno));
 	va_end(ap);
-	fflush(debugFP);
+
+	print_time();
+	fprintf(debugFP, "Exiting..\n");
+	debug_close()
 	exit(EXIT_FAILURE);
 }
 
