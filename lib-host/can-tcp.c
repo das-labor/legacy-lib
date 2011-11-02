@@ -64,7 +64,8 @@ void cann_listen(int port)
 	ret = listen_socket = socket(AF_INET, SOCK_STREAM, 0);
 	debug_assert(ret >= 0, "Could not open listeing socket: ");
 
-	setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+	ret = setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+	if(ret != 0) debug_perror(0, "Could not set socket options: ");
 
 	/* bind address */
 	memset((char *) &serv_addr, 0, sizeof(serv_addr));
