@@ -57,15 +57,14 @@ struct in_addr *atoaddr(char *address) {
 void cann_listen(int port)
 {
 	struct sockaddr_in serv_addr;
-	int ret, flags;
-	char one=1;
+	int ret, flags, one = 1;
 
 	signal(SIGPIPE, SIG_IGN);
 
 	ret = listen_socket = socket(AF_INET, SOCK_STREAM, 0);
 	debug_assert(ret >= 0, "Could not open listeing socket: ");
 
-	setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &one, 1);
+	setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
 
 	/* bind address */
 	memset((char *) &serv_addr, 0, sizeof(serv_addr));
