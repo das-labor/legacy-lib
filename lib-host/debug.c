@@ -102,20 +102,4 @@ void debug_assert( int test, char *format, ... )
 	exit(EXIT_FAILURE);
 }
 
-void debug_assert2(char *format, ... )
-{
-	va_list ap;
-
-	print_time();
-
-	va_start(ap, format);
-	fprintf(debugFP, "ERROR: debug_assert(..) failed: ");
-	vfprintf(debugFP, format, ap);
-	fprintf(debugFP, " (%s)\n", strerror(errno));
-	va_end(ap);
-
-	debug_close();
-	exit(EXIT_FAILURE);
-}
-
 
