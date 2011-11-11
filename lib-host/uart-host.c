@@ -17,23 +17,9 @@
 int uart_fd;
 
 
-static void mySignalHandler ( int reason )
-{
-	// XXX
-}
-
-static void install_signalhandler ( void )
-{
-    signal(SIGINT,mySignalHandler);
-    signal(SIGTERM,mySignalHandler);
-}
-
-
 void uart_init(char *sport) {
 	int rc;
 	struct termios options;
-
-	install_signalhandler();
 
 	/**
 	 * O_NOCTTY -- ttyS is not our controlling terminal:
