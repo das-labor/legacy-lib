@@ -421,6 +421,11 @@ void cann_transmit(cann_conn_t *conn, rs232can_msg *msg)
 /*	if (send(conn->fd, &(msg->cmd), 1, MSG_NOSIGNAL) != 1)*/
 /*		goto error;*/
 
+	/* bad hack */
+	unsigned char tmp = msg->cmd;
+	msg->cmd = msg->len;
+	msg->len = tmp;
+	
 	if (send(conn->fd, msg, sizeof(rs232can_msg) - RS232CAN_MAXLENGTH + msg->len, MSG_NOSIGNAL) != msg->len + sizeof(rs232can_msg) - RS232CAN_MAXLENGTH)
 		goto error;
 
