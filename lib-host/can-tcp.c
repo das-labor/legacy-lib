@@ -415,13 +415,13 @@ void cann_transmit(cann_conn_t *conn, rs232can_msg *msg)
 		return;
 	}
 
-	if (send(conn->fd, &(msg->len), 1, MSG_NOSIGNAL) != 1)
-		goto error;
+/*	if (send(conn->fd, &(msg->len), 1, MSG_NOSIGNAL) != 1)*/
+/*		goto error;*/
 
-	if (send(conn->fd, &(msg->cmd), 1, MSG_NOSIGNAL) != 1)
-		goto error;
+/*	if (send(conn->fd, &(msg->cmd), 1, MSG_NOSIGNAL) != 1)*/
+/*		goto error;*/
 
-	if (send(conn->fd, msg->data, msg->len, MSG_NOSIGNAL) != msg->len)
+	if (send(conn->fd, msg, sizeof(rs232can_msg) - RS232CAN_MAXLENGTH + msg->len, MSG_NOSIGNAL) != msg->len + sizeof(rs232can_msg) - RS232CAN_MAXLENGTH)
 		goto error;
 
 	return;
