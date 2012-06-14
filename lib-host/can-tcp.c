@@ -426,7 +426,7 @@ void cann_transmit(cann_conn_t *conn, rs232can_msg *msg)
 	msg->cmd = msg->len;
 	msg->len = tmp;
 	
-	if (send(conn->fd, msg, sizeof(rs232can_msg) - RS232CAN_MAXLENGTH + msg->len, MSG_NOSIGNAL) != msg->len + sizeof(rs232can_msg) - RS232CAN_MAXLENGTH)
+	if (send(conn->fd, msg, 2 + msg->cmd, MSG_NOSIGNAL) != msg->cmd + 2)
 		goto error;
 
 	return;
