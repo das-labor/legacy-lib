@@ -305,7 +305,7 @@ rs232can_msg *cann_get_nb(cann_conn_t *client)
 
 	if(client->error)
 	{
-		debug( 0, "cann_get_nb() with error %d on %d", client->error, client->fd );
+		//debug( 0, "cann_get_nb() with error %d on %d", client->error, client->fd );
 		return NULL;
 	}
 
@@ -415,18 +415,13 @@ void cann_transmit(cann_conn_t *conn, rs232can_msg *msg)
 		return;
 	}
 
-/*	if (send(conn->fd, &(msg->len), 1, MSG_NOSIGNAL) != 1)*/
-/*		goto error;*/
-
-/*	if (send(conn->fd, &(msg->cmd), 1, MSG_NOSIGNAL) != 1)*/
-/*		goto error;*/
-
-	/* bad hack */
-	unsigned char tmp = msg->cmd;
-	msg->cmd = msg->len;
-	msg->len = tmp;
-	
-	if (send(conn->fd, msg, 2 + msg->cmd, MSG_NOSIGNAL) != msg->cmd + 2)
+	/* copy this into another buffer, convert to cantcp and send it with a single write to avoid multiple tcp packets */
+	unsigned char txbuf[sizeof(rs232can_msg)], swap;
+	memcpy((void*)msg, (void*)txbuf, sizeof(rs232can_msg));
+	swap = txbuf[0];
+	txbuf[0] = txbuf[1];
+	txbuf[1] = swap;
+	if (send(conn->fd, txbuf, 2 + msg->len, MSG_NOSIGNAL) != msg->len + 2)
 		goto error;
 
 	return;
