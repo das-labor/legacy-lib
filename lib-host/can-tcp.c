@@ -417,7 +417,7 @@ void cann_transmit(cann_conn_t *conn, rs232can_msg *msg)
 
 	/* copy this into another buffer, convert to cantcp and send it with a single write to avoid multiple tcp packets */
 	unsigned char txbuf[sizeof(rs232can_msg)], swap;
-	memcpy((void*)msg, (void*)txbuf, sizeof(rs232can_msg));
+	memcpy((void*)txbuf, (void*)msg, sizeof(rs232can_msg));
 	swap = txbuf[0];
 	txbuf[0] = txbuf[1];
 	txbuf[1] = swap;
