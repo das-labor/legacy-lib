@@ -305,7 +305,7 @@ rs232can_msg *cann_get_nb(cann_conn_t *client)
 
 	if(client->error)
 	{
-		//debug( 0, "cann_get_nb() with error %d on %d", client->error, client->fd );
+		debug( 0, "cann_get_nb() with error %d on %d", client->error, client->fd );
 		return NULL;
 	}
 
