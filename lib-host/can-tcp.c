@@ -30,38 +30,18 @@ cann_conn_t *cann_conns_head = NULL;
 
 
 /*****************************************************************************
- * Utility functions -- not exportet
- */
-struct in_addr *atoaddr(char *address) {
-	struct hostent *host;
-	static struct in_addr saddr;
-
-	/* First try it as aaa.bbb.ccc.ddd. */
-	saddr.s_addr = inet_addr(address);
-	if (saddr.s_addr != -1) {
-		return &saddr;
-	}
-
-	host = gethostbyname(address);
-	if (host != NULL) {
-		return (struct in_addr *) *host->h_addr_list;
-	}
-	return NULL;
-}
-
-/*****************************************************************************
  * Connection management
  */
 
 /* open listening socket and initialize */
 void cann_listen(int port)
 {
-	struct sockaddr_in serv_addr;
+	struct sockaddr_in6 serv_addr;
 	int ret, flags, one = 1;
 
 	signal(SIGPIPE, SIG_IGN);
 
-	ret = listen_socket = socket(AF_INET, SOCK_STREAM, 0);
+	ret = listen_socket = socket(AF_INET6, SOCK_STREAM, 0);
 	debug_assert(ret >= 0, "Could not open listeing socket: ");
 
 	ret = setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
@@ -69,9 +49,9 @@ void cann_listen(int port)
 
 	/* bind address */
 	memset((char *) &serv_addr, 0, sizeof(serv_addr));
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	serv_addr.sin_port = htons(port);
+	serv_addr.sin6_family = AF_INET6;
+	serv_addr.sin6_addr = in6addr_any;
+	serv_addr.sin6_port = htons(port);
 
 	ret = bind(listen_socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 	debug_assert(ret >= 0, "Could not bind listening socket");
@@ -87,10 +67,12 @@ void cann_listen(int port)
 /* open connect to cand */
 cann_conn_t *cann_connect(char *server, int port)
 {
-	int ret;
+	struct addrinfo hints;
+	struct addrinfo *result, *rp;
+	int s, j;
+	size_t len;
+	ssize_t nread;
 	cann_conn_t *client;
-	struct sockaddr_in addr;
-	struct in_addr *server_addr;
 
 	// initialize client struct
 	client = malloc(sizeof(cann_conn_t));
@@ -104,24 +86,43 @@ cann_conn_t *cann_connect(char *server, int port)
 	client->missing_bytes = 0;
 	client->error = 0;
 
-	// get socket
-	ret = client->fd = socket(AF_INET, SOCK_STREAM, 0);
-	debug_assert(ret >= 0, "Could not open socket: ");
+	/* Obtain address(es) matching host/port */
 
-	// resolve hostname
-	server_addr = atoaddr(server);
-	debug_assert(server_addr != NULL, "Could not resolve hostname");
+	memset(&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
+	hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
+	hints.ai_flags = 0;
+	hints.ai_protocol = 0;          /* Any protocol */
 
-	// connect
-	memcpy(&(addr.sin_addr), server_addr, sizeof(in_addr_t));
-	addr.sin_port = htons(port);
-	addr.sin_family = AF_INET;
-
-	if (connect(client->fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-		debug_perror(0, "Connect failed");
+	s = getaddrinfo(server, port, &hints, &result);
+	if (s != 0) {
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
 		free(client);
 		exit(EXIT_FAILURE);
 	}
+
+	/* getaddrinfo() returns a list of address structures.
+	Try each address until we successfully connect(2).
+	If socket(2) (or connect(2)) fails, we (close the socket
+	and) try the next address. */
+
+	for (rp = result; rp != NULL; rp = rp->ai_next) {
+		client->fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+		if (client->fd == -1)
+			continue;
+
+		if (connect(client->fd, rp->ai_addr, rp->ai_addrlen) != -1)
+			break;                  /* Success */
+
+		close(client->fd);
+	}
+	if (rp == NULL) {               /* No address succeeded */
+		fprintf(stderr, "Could not connect\n");
+		free(client);
+		exit(EXIT_FAILURE);
+	}
+
+	freeaddrinfo(result);           /* No longer needed */
 
 	// set some options on socket
 	fcntl(client->fd, F_SETFL, O_NONBLOCK);
@@ -168,8 +169,8 @@ cann_conn_t *cann_accept(fd_set *set)
 	// accept connection
 	int fd;
 	socklen_t len;
-	struct sockaddr_in remote;
-	len = sizeof(struct sockaddr_in);
+	struct sockaddr_in6 remote;
+	len = sizeof(struct sockaddr_in6);
 	fd = accept(listen_socket, (struct sockaddr*)&remote, &len);
 
 	// set some options on socket
@@ -303,7 +304,7 @@ rs232can_msg *cann_get_nb(cann_conn_t *client)
 	int ret;
 	unsigned char val;
 
-	if(client->error)
+	if (client->error)
 	{
 		debug( 0, "cann_get_nb() with error %d on %d", client->error, client->fd );
 		return NULL;
