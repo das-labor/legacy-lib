@@ -8,11 +8,11 @@
 #ifdef USE_WINSOCK
 	#include <winsock.h>
 #else
+	#include <sys/types.h>
 	#include <sys/socket.h>
 	#include <sys/select.h>
 	#include <netinet/in.h>
 	#include <netinet/tcp.h>
-	#include <sys/types.h>
 	#include <netdb.h>
 #endif
 
@@ -24,7 +24,6 @@
  *
  * HOST ONLY
  */
-
 #include "can.h"
 #include "can-encap.h"
 
@@ -36,7 +35,6 @@ typedef enum {CANN_LEN, CANN_CMD, CANN_PAYLOAD} cann_state;
 
 typedef struct cann_conn {
 	int			fd;
-	struct sockaddr_in	inet_addr;
 	struct cann_conn	*next;
 
 	rs232can_msg		msg;

@@ -3,17 +3,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/select.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <netdb.h>
-#include <unistd.h>
+
 #include <fcntl.h>
 #include <errno.h>
 #include <signal.h>
-#include <arpa/inet.h>
 
 #include "can-tcp.h"
 #include "debug.h"
@@ -37,8 +30,6 @@ void cann_listen(char *port)
 	struct addrinfo hints;
 	struct addrinfo *result, *rp;
 	int sfd, s;
-	struct sockaddr_storage peer_addr;
-	socklen_t peer_addr_len;
 
 	int ret, one = 1;
 
@@ -50,10 +41,6 @@ void cann_listen(char *port)
 	hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
 	hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
 	hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG;    /* For wildcard IP address */
-	hints.ai_protocol = 0;          /* Any protocol */
-	hints.ai_canonname = NULL;
-	hints.ai_addr = NULL;
-	hints.ai_next = NULL;
 
 	s = getaddrinfo(NULL, port, &hints, &result);
 	if (s != 0) {
@@ -222,8 +209,8 @@ cann_conn_t *cann_accept(fd_set *set)
 	// accept connection
 	int fd;
 	socklen_t len;
-	struct sockaddr_in6 remote;
-	len = sizeof(struct sockaddr_in6);
+	struct sockaddr_storage remote;
+	len = sizeof(struct sockaddr_storage);
 	fd = accept(listen_socket, (struct sockaddr*)&remote, &len);
 
 	#ifndef USE_WINSOCK
