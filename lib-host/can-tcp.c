@@ -13,8 +13,6 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <signal.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 
 #include "can-tcp.h"
@@ -34,30 +32,67 @@ cann_conn_t *cann_conns_head = NULL;
  */
 
 /* open listening socket and initialize */
-void cann_listen(int port)
+void cann_listen(char *port)
 {
-	struct sockaddr_in6 serv_addr;
-	int ret, flags, one = 1;
+	struct addrinfo hints;
+	struct addrinfo *result, *rp;
+	int sfd, s;
+	struct sockaddr_storage peer_addr;
+	socklen_t peer_addr_len;
 
-	signal(SIGPIPE, SIG_IGN);
+	int ret, one = 1;
 
-	ret = listen_socket = socket(AF_INET6, SOCK_STREAM, 0);
-	debug_assert(ret >= 0, "Could not open listeing socket: ");
+	#ifndef USE_WINSOCK
+		signal(SIGPIPE, SIG_IGN);
+	#endif
 
-	ret = setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
-	if(ret != 0) debug_perror(0, "Could not set socket options: ");
+	memset(&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
+	hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
+	hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG;    /* For wildcard IP address */
+	hints.ai_protocol = 0;          /* Any protocol */
+	hints.ai_canonname = NULL;
+	hints.ai_addr = NULL;
+	hints.ai_next = NULL;
 
-	/* bind address */
-	memset((char *) &serv_addr, 0, sizeof(serv_addr));
-	serv_addr.sin6_family = AF_INET6;
-	serv_addr.sin6_addr = in6addr_any;
-	serv_addr.sin6_port = htons(port);
+	s = getaddrinfo(NULL, port, &hints, &result);
+	if (s != 0) {
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
+		exit(EXIT_FAILURE);
+	}
 
-	ret = bind(listen_socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
-	debug_assert(ret >= 0, "Could not bind listening socket");
+	/* getaddrinfo() returns a list of address structures.
+	   Try each address until we successfully bind(2).
+	   If socket(2) (or bind(2)) fails, we (close the socket
+	   and) try the next address. */
 
-	flags = fcntl( listen_socket, F_GETFL, 0 );
-	fcntl( listen_socket, F_SETFL, flags | O_NDELAY );
+	for (rp = result; rp != NULL; rp = rp->ai_next) {
+		sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+		if (sfd == -1)
+			continue;
+
+		ret = setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+		if (ret != 0) debug_perror(0, "Could not set socket options: ");
+		if (bind(sfd, rp->ai_addr, rp->ai_addrlen) == 0)
+			break;                  /* Success */
+
+		close(sfd);
+	}
+
+	if (rp == NULL) {               /* No address succeeded */
+		debug_perror(0, "Could not bind\n");
+		exit(EXIT_FAILURE);
+	}
+
+	freeaddrinfo(result);           /* No longer needed */
+	listen_socket = sfd;
+
+
+	#ifndef USE_WINSOCK
+		int flags;
+		flags = fcntl(listen_socket, F_GETFL, 0);
+		fcntl(listen_socket, F_SETFL, flags | O_NDELAY);
+	#endif
 
 	/* specify queue */
 	listen(listen_socket, 5);
@@ -65,13 +100,11 @@ void cann_listen(int port)
 }
 
 /* open connect to cand */
-cann_conn_t *cann_connect(char *server, int port)
+cann_conn_t *cann_connect(char *server, char *port)
 {
 	struct addrinfo hints;
 	struct addrinfo *result, *rp;
-	int s, j;
-	size_t len;
-	ssize_t nread;
+	int s;
 	cann_conn_t *client;
 
 	// initialize client struct
@@ -86,17 +119,29 @@ cann_conn_t *cann_connect(char *server, int port)
 	client->missing_bytes = 0;
 	client->error = 0;
 
+	#ifdef USE_WINSOCK
+		WSADATA wsaData;
+		int err;
+
+		err = WSAStartup(0x0202, &wsaData);
+		if (err != 0) {
+			/* Tell the user that we could not find a usable */
+			/* Winsock DLL.                                  */
+			printf("WSAStartup failed with error: %d\n", err);
+			exit(EXIT_FAILURE);
+		}
+	#endif
 	/* Obtain address(es) matching host/port */
 
 	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
 	hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
-	hints.ai_flags = 0;
+	hints.ai_flags = AI_ADDRCONFIG;
 	hints.ai_protocol = 0;          /* Any protocol */
 
 	s = getaddrinfo(server, port, &hints, &result);
 	if (s != 0) {
-		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
+		debug_perror(0, "getaddrinfo: %s\n", gai_strerror(s));
 		free(client);
 		exit(EXIT_FAILURE);
 	}
@@ -117,21 +162,29 @@ cann_conn_t *cann_connect(char *server, int port)
 		close(client->fd);
 	}
 	if (rp == NULL) {               /* No address succeeded */
-		fprintf(stderr, "Could not connect\n");
+		debug_perror(0, "Could not connect\n");
 		free(client);
 		exit(EXIT_FAILURE);
 	}
 
 	freeaddrinfo(result);           /* No longer needed */
+	listen_socket = client->fd;
+	#ifdef USE_WINSOCK
+		u_long option = 1;
+		ioctlsocket(client->fd, FIONBIO, &option);
+	#else
+		// set some options on socket
+		fcntl(client->fd, F_SETFL, O_NONBLOCK);
+	#endif
 
-	// set some options on socket
-	fcntl(client->fd, F_SETFL, O_NONBLOCK);
 	int flag = 1;
 	setsockopt(client->fd,
 		   IPPROTO_TCP,     /* set option at TCP level */
 		   TCP_NODELAY,     /* name of option */
 		   (char *) &flag,  /* the cast is historical cruft */
 		   sizeof(int));    /* length of option value */
+
+	debug(9, "connected to server, fd=%d\r\n", client->fd);
 
 	return client;
 }
@@ -173,8 +226,11 @@ cann_conn_t *cann_accept(fd_set *set)
 	len = sizeof(struct sockaddr_in6);
 	fd = accept(listen_socket, (struct sockaddr*)&remote, &len);
 
-	// set some options on socket
-	fcntl(fd, F_SETFL, O_NONBLOCK);
+	#ifndef USE_WINSOCK
+		// set some options on socket
+		fcntl(fd, F_SETFL, O_NONBLOCK);
+	#endif
+
 	int flag = 1;
 	setsockopt(fd,
 		   IPPROTO_TCP,     /* set option at TCP level */
@@ -229,7 +285,9 @@ void cann_close(cann_conn_t *conn)
 		while (conn) {
 			cann_conn_t *oldconn = conn;
 			debug(1, "close socket");
-			shutdown(conn->fd, SHUT_RDWR);
+			#ifndef USE_WINSOCK
+				shutdown(conn->fd, SHUT_RDWR);
+			#endif
 			close(conn->fd);
 			conn = conn->next;
 			free(oldconn);
@@ -304,9 +362,9 @@ rs232can_msg *cann_get_nb(cann_conn_t *client)
 	int ret;
 	unsigned char val;
 
-	if (client->error)
-	{
-		debug( 0, "cann_get_nb() with error %d on %d", client->error, client->fd );
+	// sanity
+	if (client->error) {
+		debug( 0, "cann_get_nb() with error %d on %d", client->error, client->fd);
 		return NULL;
 	}
 
@@ -324,6 +382,9 @@ rs232can_msg *cann_get_nb(cann_conn_t *client)
 			client->error = 1;
 			return NULL;
 		}
+
+		if (val == 0)
+			return NULL;
 
 		debug(10, "Next packet on %d: length=%d", client->fd, val);
 		client->msg.len        = val;
@@ -353,7 +414,7 @@ rs232can_msg *cann_get_nb(cann_conn_t *client)
 		client->rcv_ptr       += ret;
 
 		debug(10, "fd %d: recived %d bytes, %d missing",
-				client->fd, ret, client->missing_bytes);
+			  client->fd, ret, client->missing_bytes);
 	}
 
 	// message complete?
@@ -415,6 +476,8 @@ void cann_transmit(cann_conn_t *conn, rs232can_msg *msg)
 		debug(5, "cann_transmit: not transmiting on errorous connection fd=%d", conn->fd);
 		return;
 	}
+
+	debug(9, "Transmitting message fd=%d", conn->fd);
 
 	/* copy this into another buffer, convert to cantcp and send it with a single write to avoid multiple tcp packets */
 	unsigned char txbuf[sizeof(rs232can_msg)], swap;

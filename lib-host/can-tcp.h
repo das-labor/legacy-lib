@@ -1,5 +1,20 @@
-#ifndef CANN_H
-#define CANN_H
+#ifndef _CAN_TCP_H
+#define _CAN_TCP_H
+
+#ifdef __MINGW32__
+	#define USE_WINSOCK
+#endif
+
+#ifdef USE_WINSOCK
+	#include <winsock.h>
+#else
+	#include <sys/socket.h>
+	#include <sys/select.h>
+	#include <netinet/in.h>
+	#include <netinet/tcp.h>
+	#include <sys/types.h>
+	#include <netdb.h>
+#endif
 
 /******************************************************************************
  * Encapsulated CAN messages over TCP/IP -- low level functions
@@ -9,13 +24,9 @@
  *
  * HOST ONLY
  */
+
 #include "can.h"
 #include "can-encap.h"
-
-// for select
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 
 /*****************************************************************************
  * Structures
@@ -46,10 +57,10 @@ extern cann_conn_t *cann_conns_head;
  */
 
 /* open listening socket and initialize */
-void cann_listen(int port);
+void cann_listen(char *port);
 
 /* open connect to cand */
-cann_conn_t *cann_connect(char *server, int port);
+cann_conn_t *cann_connect(char *server, char *port);
 
 /* set bits in fd_set and return highest FD */
 int cann_fdset(fd_set *set);
@@ -69,7 +80,7 @@ cann_conn_t *cann_activity(fd_set *set);
  */
 rs232can_msg *cann_buffer_get();
 void cann_free(rs232can_msg *);
-void cann_conn_free(cann_conn_t* conn);
+void cann_conn_free(cann_conn_t *conn);
 
 /*****************************************************************************
  * rcv
@@ -94,4 +105,3 @@ void cann_dumpconn();
 void cann_close_errors();
 
 #endif
-
