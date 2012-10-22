@@ -212,7 +212,7 @@ cann_conn_t *cann_accept(fd_set *set)
 	// set some options on socket
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 
-	debug(10, "New Client\n");
+	debug(3, "New Client\n");
 	char buf1[200];
 	if (getnameinfo ((struct sockaddr *) &remote, len,
 		buf1, sizeof (buf1), NULL, 0, 0) != 0)
@@ -220,7 +220,7 @@ cann_conn_t *cann_accept(fd_set *set)
 	char buf2[100];
 	(void) getnameinfo ((struct sockaddr *) &remote, len,
 		buf2, sizeof (buf2), NULL, 0, NI_NUMERICHOST);
-	debug(10,"connection from %s (%s)\n", buf1, buf2);
+	debug(3,"connection from %s (%s)\n", buf1, buf2);
 
 	int flag = 1;
 	setsockopt(fd,
@@ -276,9 +276,9 @@ void cann_close(cann_conn_t *conn)
 		while (conn) {
 			cann_conn_t *oldconn = conn;
 			debug(1, "close socket");
-			#ifndef USE_WINSOCK
+
 				shutdown(conn->fd, SHUT_RDWR);
-			#endif
+
 			close(conn->fd);
 			conn = conn->next;
 			free(oldconn);
