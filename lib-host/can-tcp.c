@@ -33,12 +33,11 @@ void cann_listen(char *port)
 
 	int ret, one = 1;
 
-	#ifndef USE_WINSOCK
-		signal(SIGPIPE, SIG_IGN);
-	#endif
+	signal(SIGPIPE, SIG_IGN);
+
 
 	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
+	hints.ai_family = AF_INET6;    /* Allow IPv4 or IPv6 */
 	hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
 	hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG;    /* For wildcard IP address */
 
@@ -74,15 +73,12 @@ void cann_listen(char *port)
 	freeaddrinfo(result);           /* No longer needed */
 	listen_socket = sfd;
 
-
-	#ifndef USE_WINSOCK
-		int flags;
-		flags = fcntl(listen_socket, F_GETFL, 0);
-		fcntl(listen_socket, F_SETFL, flags | O_NDELAY);
-	#endif
+	int flags = 0;
+	flags = fcntl(listen_socket, F_GETFL, 0);
+	fcntl(listen_socket, F_SETFL, flags | O_NDELAY);
 
 	/* specify queue */
-	listen(listen_socket, 5);
+	ret = listen(listen_socket, SOMAXCONN);
 	debug_assert(ret >= 0, "Could listen() listening socket");
 }
 
@@ -208,15 +204,23 @@ cann_conn_t *cann_accept(fd_set *set)
 
 	// accept connection
 	int fd;
-	socklen_t len;
 	struct sockaddr_storage remote;
-	len = sizeof(struct sockaddr_storage);
+	socklen_t len = sizeof(remote);
+
 	fd = accept(listen_socket, (struct sockaddr*)&remote, &len);
 
-	#ifndef USE_WINSOCK
-		// set some options on socket
-		fcntl(fd, F_SETFL, O_NONBLOCK);
-	#endif
+	// set some options on socket
+	fcntl(fd, F_SETFL, O_NONBLOCK);
+
+	debug(10, "New Client\n");
+	char buf1[200];
+	if (getnameinfo ((struct sockaddr *) &remote, len,
+		buf1, sizeof (buf1), NULL, 0, 0) != 0)
+	strcpy (buf1, "???");
+	char buf2[100];
+	(void) getnameinfo ((struct sockaddr *) &remote, len,
+		buf2, sizeof (buf2), NULL, 0, NI_NUMERICHOST);
+	debug(10,"connection from %s (%s)\n", buf1, buf2);
 
 	int flag = 1;
 	setsockopt(fd,
