@@ -1,5 +1,5 @@
-#ifndef CAN_H
-#define CAN_H
+#ifndef _CAN_H
+#define _CAN_H
 
 /*****************************************************************************
  * Simple CAN Library
