@@ -374,9 +374,6 @@ rs232can_msg *cann_get_nb(cann_conn_t *client)
 			return NULL;
 		}
 
-		if (val == 0)
-			return NULL;
-
 		debug(10, "Next packet on %d: length=%d", client->fd, val);
 		client->msg.len        = val;
 		client->missing_bytes  = val;
