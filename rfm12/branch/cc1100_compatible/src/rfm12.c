@@ -210,7 +210,7 @@ ISR(RFM12_INT_VECT, ISR_NOBLOCK)
 						checksum = data;
 
 						//add the packet overhead and store it into a working variable
-						ctrl.num_bytes = data + PACKET_OVERHEAD;
+						ctrl.num_bytes = data + PACKET_OVERHEAD - LENGTH_ADJUST;
 
 						//debug
 						#if RFM12_UART_DEBUG >= 2
@@ -227,7 +227,7 @@ ISR(RFM12_INT_VECT, ISR_NOBLOCK)
 							//store the received length into the packet buffer
 							//this length field will be used by application reading the
 							//buffer.
-							rf_rx_buffers[ctrl.buffer_in_num].len = data;
+							rf_rx_buffers[ctrl.buffer_in_num].len = data - LENGTH_ADJUST;
 
 							//end the interrupt without resetting the fifo
 							goto no_fifo_reset;
@@ -267,7 +267,8 @@ ISR(RFM12_INT_VECT, ISR_NOBLOCK)
 							if (ctrl.bytecount == 2 && checksum != 0xff) {
 								//if the checksum does not match, reset the fifo
 								break;
-#endif						}
+							}
+#endif
 
 							//increment bytecount
 							ctrl.bytecount++;
@@ -498,7 +499,7 @@ void rfm12_tick(void) {
 
 		//calculate number of bytes to be sent by ISR
 		//2 sync bytes + len byte + type byte + checksum + message length + 1 dummy byte
-		ctrl.num_bytes = rf_tx_buffer.len + 6;
+		ctrl.num_bytes = rf_tx_buffer.len + 6 - LENGTH_ADJUST;
 
 		//reset byte sent counter
 		ctrl.bytecount = 0;
@@ -555,6 +556,7 @@ rfm12_start_tx(uint8_t type, uint8_t length) {
 	if (ctrl.txstate != STATUS_FREE)
 		return TXRETURN(RFM12_TX_OCCUPIED);
 
+	length += LENGTH_ADJUST; //add 2 to length field for cc1100
 	//write airlab header to buffer
 	rf_tx_buffer.len = length;
 	rf_tx_buffer.type = type;

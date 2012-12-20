@@ -39,10 +39,16 @@
 #define STATE_TX 2
 #define STATE_POWER_DOWN 3
 
-
 //packet header length in bytes
 #define PACKET_OVERHEAD 3
 
+#ifdef CC1100_COMPATIBLE
+	#define LENGTH_ADJUST 2
+	//the CC1100 defines the lenght field in hardware, so it counts
+	//our 2 header bytes as data
+#else
+	#define LENGTH_ADJUST 0
+#endif
 
 /************************
 * LIBRARY DEFAULT SETTINGS
