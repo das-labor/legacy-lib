@@ -37,7 +37,7 @@ void cann_listen(char *port)
 
 
 	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_family = AF_INET6;    /* Allow IPv4 or IPv6 */
+	hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
 	hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
 	hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG;    /* For wildcard IP address */
 
