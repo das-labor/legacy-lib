@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
-
+#include <arpa/inet.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <signal.h>
@@ -19,6 +19,29 @@ cann_conn_t *cann_conns_head = NULL;
  #define max(a,b) (((a) > (b)) ? (a) : (b))
 #endif
 
+
+//Convert a struct sockaddr address to a string, IPv4 and IPv6:
+
+char *get_ip_str(const struct sockaddr *sa, char *s, size_t maxlen)
+{
+    switch (sa->sa_family) {
+        case AF_INET:
+            inet_ntop(AF_INET, &(((struct sockaddr_in *)sa)->sin_addr),
+                    s, maxlen);
+            break;
+
+        case AF_INET6:
+            inet_ntop(AF_INET6, &(((struct sockaddr_in6 *)sa)->sin6_addr),
+                    s, maxlen);
+            break;
+
+        default:
+            strncpy(s, "Unknown AF", maxlen);
+            return NULL;
+    }
+
+    return s;
+}
 
 /*****************************************************************************
  * Connection management
@@ -39,7 +62,7 @@ void cann_listen(char *port)
 	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_INET6;  // Allow IPv4 or IPv6 - ipv4 is mapped into an v6 addr -> ai_v4mapped
 	hints.ai_socktype = SOCK_STREAM;		// Datagram socket
-	hints.ai_flags = AI_PASSIVE | AI_V4MAPPED;	// For wildcard IP address
+	hints.ai_flags = AI_PASSIVE | AI_V4MAPPED | AI_NUMERICSERV;     // For wildcard IP address
 
 	s = getaddrinfo(NULL, port, &hints, &result);
 	if (s != 0) {
@@ -82,13 +105,14 @@ void cann_listen(char *port)
 	debug_assert(ret >= 0, "Could listen() listening socket");
 }
 
-/* open connect to cand */
+/* open connection to cand */
 cann_conn_t *cann_connect(char *server, char *port)
 {
 	struct addrinfo hints;
 	struct addrinfo *result, *rp;
 	int s;
 	cann_conn_t *client;
+	char buf[INET6_ADDRSTRLEN];
 
 	// initialize client struct
 	client = malloc(sizeof(cann_conn_t));
@@ -119,7 +143,7 @@ cann_conn_t *cann_connect(char *server, char *port)
 	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
 	hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
-	hints.ai_flags = AI_ADDRCONFIG;
+	hints.ai_flags = AI_ADDRCONFIG | AI_NUMERICSERV; // 
 	hints.ai_protocol = 0;          /* Any protocol */
 
 	s = getaddrinfo(server, port, &hints, &result);
@@ -149,6 +173,8 @@ cann_conn_t *cann_connect(char *server, char *port)
 		free(client);
 		exit(EXIT_FAILURE);
 	}
+	debug(4, "Connected to %s.", get_ip_str((struct sockaddr *)rp->ai_addr, buf, sizeof(buf)));
+
 
 	freeaddrinfo(result);           /* No longer needed */
 	listen_socket = client->fd;

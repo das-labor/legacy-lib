@@ -15,7 +15,7 @@
 void uart_init(char *sport);
 
 void uart_putc(char c);
-void uart_putstr(char * str);
+void uart_putstr(char *str);
 
 char uart_getc();
 char uart_getc_nb(char *c);		// returns 1 on success
