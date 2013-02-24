@@ -206,15 +206,29 @@ void tcp_server_close_all_connections(tcp_server_t * serv)
 
 void tcp_server_handle_activity(tcp_server_t *serv, fd_set *set) {
 	tcp_connection_t * conn = serv->connections_head;
-
+	tcp_connection_t ** link_to_conn = &serv->connections_head;
+		
 	//check for activity on connections
 	while (conn) {
 		if (FD_ISSET(conn->fd, set)) {
 			FD_CLR(conn->fd, set);
 			//handle it
-			serv->receive_handler(conn->fd, conn->ref);
+			int ret = serv->receive_handler(conn->fd, conn->ref);
+			if (ret != 0) { //close connection requested by handler
+				tcp_connection_t *oldconn = conn;
+				debug(1, "===> Closing fd %d", conn->fd);
+
+				shutdown(conn->fd, SHUT_RDWR);
+
+				close(conn->fd);
+				*link_to_conn = conn->next;//remove ourselves from the list
+				conn = conn->next; //go to next element
+				free(oldconn);
+				continue;
+			}
 		}
-		conn = conn->next;
+		link_to_conn = &conn->next;
+		conn = conn->next;			
 	}
 	
 	
