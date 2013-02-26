@@ -22,7 +22,7 @@
 // i.e. the connection should be kept open.
 // a nonzero return closes the connection. The user should clean up
 // and free his ref structure in that case before returning.
-typedef int (*tcp_receive_handler_t)(int fd, void * ref);
+typedef int (*tcp_receive_handler_t)(int fd, void *ref);
 
 
 // prototype for new connection handler. this is called when the server accepts
@@ -39,14 +39,14 @@ typedef struct tcp_connection {
 	
 	//user reference that can be set by the new_connection handler, 
 	//and used by the receive handler to identify an individual client
-	void *                ref; 
+	void                 *ref;
 	
 	
 //	int			          error;
 } tcp_connection_t;
 
 typedef struct {
-	tcp_connection_t           * connections_head;
+	tcp_connection_t           *connections_head;
 	int                          listen_socket;
 	tcp_receive_handler_t        receive_handler;
 	tcp_accept_handler_t         accept_handler;
@@ -58,8 +58,11 @@ int tcp_server_fdset(tcp_server_t *serv, fd_set *set);
 
 void tcp_server_handle_activity(tcp_server_t *serv, fd_set *set);
 
-tcp_server_t * new_tcp_server(
-	char * port,
+tcp_server_t *new_tcp_server(
+	char *port,
 	tcp_receive_handler_t receive_handler,
 	tcp_accept_handler_t accept_handler
-) ;
+);
+
+void tcp_server_close_all_connections(tcp_server_t *serv);
+
