@@ -191,7 +191,7 @@ void tcp_server_close_all_connections(tcp_server_t *serv)
 	tcp_connection_t *conn = serv->connections_head;
 	while (conn) {
 		tcp_connection_t *oldconn = conn;
-		debug(1, "===> Closing fd %d", conn->fd);
+		debug(1, "%s: ===> Closing fd %d", __FUNCTION__, conn->fd);
 
 		shutdown(conn->fd, SHUT_RDWR);
 
@@ -213,7 +213,7 @@ void tcp_server_handle_activity(tcp_server_t *serv, fd_set *set) {
 			int ret = serv->receive_handler(conn->fd, conn->ref);
 			if (ret != 0) { //close connection requested by handler
 				tcp_connection_t *oldconn = conn;
-				debug(1, "===> Closing fd %d", conn->fd);
+				debug(1, "%s: ===> Closing fd %d", __FUNCTION__, conn->fd);
 
 				shutdown(conn->fd, SHUT_RDWR);
 

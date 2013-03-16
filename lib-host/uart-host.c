@@ -29,7 +29,7 @@ void uart_init(char *sport) {
 	 */
 	uart_fd = open(sport, O_RDWR | O_NOCTTY | O_NDELAY);
 	if (uart_fd == -1) {
-        	debug_perror(0, "Error opening serial port %s", sport);
+		debug_perror(0, "Error opening serial port %s", sport);
 		exit(EXIT_FAILURE);
 	}
 
