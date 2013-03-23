@@ -14,7 +14,7 @@ can_addr myaddr;
 extern jmp_buf newmode_jmpbuf;
 
 
-char default_text[] PROGMEM = SCROLLTEXT_DEFAULT;
+char const default_text[] PROGMEM = SCROLLTEXT_DEFAULT;
 char scrolltext_text[SCROLLTEXT_STRING_SIZE];
 
 
