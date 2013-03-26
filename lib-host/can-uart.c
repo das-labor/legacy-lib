@@ -63,7 +63,7 @@ rs232can_msg *canu_get_nb()
 {
 	static char *uartpkt_data;
 	static unsigned int crc;
-	char c;
+	unsigned char c;
 
 	while (uart_getc_nb(&c))
 	{
