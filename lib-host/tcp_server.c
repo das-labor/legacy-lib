@@ -51,13 +51,13 @@ static int open_listening_socket(char *port)
 	struct addrinfo hints;
 	struct addrinfo *result, *rp;
 	int sfd, s;
-
+	char buf[200];
 	int ret, one = 1;
 
 	signal(SIGPIPE, SIG_IGN);
 
 	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_family = AF_INET6;  // Allow IPv4 or IPv6 - ipv4 is mapped into an v6 addr -> ai_v4mapped
+	hints.ai_family = AF_UNSPEC;  // Allow IPv4 or IPv6 - ipv4 is mapped into an v6 addr -> ai_v4mapped
 	hints.ai_socktype = SOCK_STREAM;		// Datagram socket
 	hints.ai_flags = AI_PASSIVE | AI_V4MAPPED | AI_NUMERICSERV;     // For wildcard IP address
 
@@ -81,17 +81,17 @@ static int open_listening_socket(char *port)
 		if (ret != 0) debug_perror(0, "Could not set socket options: ");
 		if (bind(sfd, rp->ai_addr, rp->ai_addrlen) == 0)
 			break;                  /* Success */
-
+		debug_perror(0, "Could not bind to %s.", get_ip_str((struct sockaddr *)rp->ai_addr, buf, sizeof(buf)));
 		close(sfd);
 	}
 
 	if (rp == NULL) {               /* No address succeeded */
-		debug_perror(0, "Could not bind\n");
+		debug_perror(0, "All addresses in use");
 		exit(EXIT_FAILURE);
 	}
 
 	freeaddrinfo(result);           /* No longer needed */
-	
+
 	int flags = 0;
 	flags = fcntl(sfd, F_GETFL, 0);
 	fcntl(sfd, F_SETFL, flags | O_NDELAY);

@@ -10,6 +10,7 @@
 
 #include "can-tcp.h"
 #include "debug.h"
+#include "tcp_server.h"
 
 int listen_socket;
 cann_conn_t *cann_conns_head = NULL;
@@ -22,25 +23,25 @@ cann_conn_t *cann_conns_head = NULL;
 
 //Convert a struct sockaddr address to a string, IPv4 and IPv6:
 
-char *get_ip_str(const struct sockaddr *sa, char *s, size_t maxlen)
+static char *get_ip_str(const struct sockaddr *sa, char *s, size_t maxlen)
 {
-    switch (sa->sa_family) {
-        case AF_INET:
-            inet_ntop(AF_INET, &(((struct sockaddr_in *)sa)->sin_addr),
-                    s, maxlen);
-            break;
+	switch (sa->sa_family) {
+		case AF_INET:
+			inet_ntop(AF_INET, &(((struct sockaddr_in *)sa)->sin_addr),
+			          s, maxlen);
+			break;
 
-        case AF_INET6:
-            inet_ntop(AF_INET6, &(((struct sockaddr_in6 *)sa)->sin6_addr),
-                    s, maxlen);
-            break;
+		case AF_INET6:
+			inet_ntop(AF_INET6, &(((struct sockaddr_in6 *)sa)->sin6_addr),
+			          s, maxlen);
+			break;
 
-        default:
-            strncpy(s, "Unknown AF", maxlen);
-            return NULL;
-    }
+		default:
+			strncpy(s, "Unknown AF", maxlen);
+			return NULL;
+	}
 
-    return s;
+	return s;
 }
 
 /*****************************************************************************
@@ -53,16 +54,15 @@ void cann_listen(char *port)
 	struct addrinfo hints;
 	struct addrinfo *result, *rp;
 	int sfd, s;
-
+	char buf[200];
 	int ret, one = 1;
 
 	signal(SIGPIPE, SIG_IGN);
 
-
 	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_family = AF_INET6;  // Allow IPv4 or IPv6 - ipv4 is mapped into an v6 addr -> ai_v4mapped
+	hints.ai_family = AF_UNSPEC;  // Allow IPv4 or IPv6 - ipv4 is mapped into an v6 addr -> ai_v4mapped
 	hints.ai_socktype = SOCK_STREAM;		// Datagram socket
-	hints.ai_flags = AI_PASSIVE | AI_V4MAPPED | AI_NUMERICSERV;     // For wildcard IP address
+	hints.ai_flags = AI_PASSIVE | AI_V4MAPPED | AI_NUMERICSERV | AI_ALL;     // For wildcard IP address
 
 	s = getaddrinfo(NULL, port, &hints, &result);
 	if (s != 0) {
@@ -76,6 +76,10 @@ void cann_listen(char *port)
 	   and) try the next address. */
 
 	for (rp = result; rp != NULL; rp = rp->ai_next) {
+		debug(5, "aif %i: ais %i: aip %i\n\r",rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+	}
+
+	for (rp = result; rp != NULL; rp = rp->ai_next) {
 		sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
 		if (sfd == -1)
 			continue;
@@ -84,12 +88,12 @@ void cann_listen(char *port)
 		if (ret != 0) debug_perror(0, "Could not set socket options: ");
 		if (bind(sfd, rp->ai_addr, rp->ai_addrlen) == 0)
 			break;                  /* Success */
-
+		debug_perror(0, "Could not bind to %s.", get_ip_str((struct sockaddr *)rp->ai_addr, buf, sizeof(buf)));
 		close(sfd);
 	}
 
 	if (rp == NULL) {               /* No address succeeded */
-		debug_perror(0, "Could not bind\n");
+		debug_perror(0, "All addresses in use");
 		exit(EXIT_FAILURE);
 	}
 
