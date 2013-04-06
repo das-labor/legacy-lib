@@ -70,6 +70,8 @@ void uart_init(char *sport) {
 		close(uart_fd);
 		exit(EXIT_FAILURE);
 	}
+	else
+		debug(1, "Serial CAN communication established at xx Baud"); //XXX add code
 }
 
 void uart_close() {
