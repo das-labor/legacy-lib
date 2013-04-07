@@ -55,39 +55,60 @@ void cann_listen(char *port)
 	struct addrinfo *result, *rp;
 	int sfd, s;
 	char buf[200];
-	int ret, one = 1;
+	int ret, one = 1, zero = 0;
 
 	signal(SIGPIPE, SIG_IGN);
 
 	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_family = AF_UNSPEC;  // Allow IPv4 or IPv6 - ipv4 is mapped into an v6 addr -> ai_v4mapped
+	hints.ai_family = AF_INET6;  // Allow IPv4 or IPv6 - ipv4 is mapped into an v6 addr -> ai_v4mapped
 	hints.ai_socktype = SOCK_STREAM;		// Datagram socket
 	hints.ai_flags = AI_PASSIVE | AI_V4MAPPED | AI_NUMERICSERV | AI_ALL;     // For wildcard IP address
 
 	s = getaddrinfo(NULL, port, &hints, &result);
 	if (s != 0) {
-		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
+		fprintf(stderr, "No listening addresses available (getaddrinfo: %s)\n", gai_strerror(s));
 		exit(EXIT_FAILURE);
 	}
+
+	//dump address info
+	for (rp = result; rp != NULL; rp = rp->ai_next)
+		debug(5, "Found Address %s\t\t(family: %s, socktype %i: protocol %i)",
+			get_ip_str((struct sockaddr *)rp->ai_addr,
+			buf, sizeof(buf)),
+			(rp->ai_family == AF_INET)?"IPv4":((rp->ai_family == AF_INET6)?"IPv6":((snprintf(buf, sizeof(buf), "%i", rp->ai_family) != 0)?buf:"")),
+			rp->ai_socktype,
+			rp->ai_protocol);
 
 	/* getaddrinfo() returns a list of address structures.
 	   Try each address until we successfully bind(2).
 	   If socket(2) (or bind(2)) fails, we (close the socket
 	   and) try the next address. */
-
-	for (rp = result; rp != NULL; rp = rp->ai_next) {
-		debug(5, "aif %i: ais %i: aip %i\n\r",rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-	}
-
+	   
 	for (rp = result; rp != NULL; rp = rp->ai_next) {
 		sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
 		if (sfd == -1)
 			continue;
-
+			
+		debug(5, "Trying to bind to %s (%s)",
+			get_ip_str((struct sockaddr *)rp->ai_addr,
+			buf, sizeof(buf)),
+			(rp->ai_family == AF_INET)?"IPv4":((rp->ai_family == AF_INET6)?"IPv6":((snprintf(buf, sizeof(buf), "%i", rp->ai_family) != 0)?buf:"")),
+			rp->ai_socktype,
+			rp->ai_protocol);
+		
+		//set reuseaddr	to avoid address in use (b/c if close_wait) when restarting
 		ret = setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+	
+		//make this a dual-stack socket in windows
+#if defined(_WIN32)
+		ret = setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+#endif
+
 		if (ret != 0) debug_perror(0, "Could not set socket options: ");
+		
 		if (bind(sfd, rp->ai_addr, rp->ai_addrlen) == 0)
 			break;                  /* Success */
+			
 		debug_perror(0, "Could not bind to %s.", get_ip_str((struct sockaddr *)rp->ai_addr, buf, sizeof(buf)));
 		close(sfd);
 	}
@@ -95,7 +116,7 @@ void cann_listen(char *port)
 	if (rp == NULL) {               /* No address succeeded */
 		debug_perror(0, "All addresses in use");
 		exit(EXIT_FAILURE);
-	}
+	} else debug(5, "Bind succeeded!");
 
 	freeaddrinfo(result);           /* No longer needed */
 	listen_socket = sfd;
