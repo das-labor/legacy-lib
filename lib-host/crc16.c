@@ -5,7 +5,7 @@
 
 unsigned int crc16_update(unsigned int crc, unsigned char a)
 {
-	int i;
+	unsigned int i;
 
 	crc ^= a;
 	for (i = 0; i < 8; ++i)

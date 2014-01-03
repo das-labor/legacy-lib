@@ -55,7 +55,7 @@ void cann_listen(char *port)
 	struct addrinfo *result, *rp;
 	int sfd, s;
 	char buf[200];
-	int ret, one = 1, zero = 0;
+	int ret, one = 1;
 
 	signal(SIGPIPE, SIG_IGN);
 
@@ -327,9 +327,7 @@ void cann_close(cann_conn_t *conn)
 		while (conn) {
 			cann_conn_t *oldconn = conn;
 			debug(1, "close socket");
-
-				shutdown(conn->fd, SHUT_RDWR);
-
+			shutdown(conn->fd, SHUT_RDWR);
 			close(conn->fd);
 			conn = conn->next;
 			free(oldconn);
@@ -493,7 +491,7 @@ rs232can_msg *cann_get(cann_conn_t *client)
 		FD_ZERO(&rset);
 		FD_SET(client->fd, &rset);
 
-		ret = select(client->fd + 1, &rset, (fd_set*)NULL, (fd_set*)NULL, NULL);
+		ret = select(client->fd + 1, &rset, (fd_set *) NULL, (fd_set *) NULL, NULL);
 		debug_assert(ret >= 0, "cann_get: select failed");
 
 		rmsg = cann_get_nb(client);
@@ -520,7 +518,7 @@ void cann_transmit(cann_conn_t *conn, rs232can_msg *msg)
 
 	/* copy this into another buffer, convert to cantcp and send it with a single write to avoid multiple tcp packets */
 	unsigned char txbuf[sizeof(rs232can_msg)], swap;
-	memcpy((void*)txbuf, (void*)msg, sizeof(rs232can_msg));
+	memcpy((void *) txbuf, (void *) msg, sizeof(rs232can_msg));
 	swap = txbuf[0];
 	txbuf[0] = txbuf[1];
 	txbuf[1] = swap;
