@@ -1,5 +1,5 @@
-#ifndef _CAN_H
-#define _CAN_H
+#ifndef _LIB_CAN_H
+#define _LIB_CAN_H
 
 /*****************************************************************************
  * Simple CAN Library
@@ -87,6 +87,7 @@ void can_transmit(can_message *msg);
 
 can_message *can_get();
 can_message *can_get_nb();
+void can_free(can_message * msg);
 
 // this is only needed for Interrupt driven Version
 #ifndef CAN_INTERRUPT
@@ -141,4 +142,4 @@ void can_free_v2(can_message_v2 *msg);
 
 
 
-#endif
+#endif // _LIB_CAN_H
