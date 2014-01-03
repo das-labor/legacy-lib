@@ -1,5 +1,5 @@
-#ifndef _LIB_CAN_H
-#define _LIB_CAN_H
+#ifndef _CAN_H
+#define _CAN_H
 
 /*****************************************************************************
  * Simple CAN Library
@@ -14,7 +14,7 @@
  * Types
  */
 
- #include <stdint.h>
+#include <stdint.h>
 
 typedef unsigned char can_addr;
 typedef unsigned char can_port;
@@ -63,8 +63,8 @@ typedef enum { normal, mode_sleep, loopback, listenonly, config } can_mode_t ;
  * Management
  */
 
-void can_init();
-void can_setfilter();
+void can_init(void);
+void can_setfilter(void);
 void can_setmode(can_mode_t);
 void can_setled(unsigned char led, unsigned char state);
 
@@ -73,7 +73,7 @@ void can_setled(unsigned char led, unsigned char state);
  * Sending
  */
 
-can_message *can_buffer_get();
+can_message *can_buffer_get(void);
 void can_transmit(can_message *msg);
 
 #ifdef POSIX
@@ -85,8 +85,8 @@ void can_transmit(can_message *msg);
  * Receiving
  */
 
-can_message *can_get();
-can_message *can_get_nb();
+can_message *can_get(void);
+can_message *can_get_nb(void);
 void can_free(can_message * msg);
 
 // this is only needed for Interrupt driven Version
@@ -102,7 +102,7 @@ void can_free(can_message * msg);
  * Sending
  */
 
-can_message_raw *can_buffer_get_raw();
+can_message_raw *can_buffer_get_raw(void);
 void can_transmit_raw(can_message_raw *msg);
 
 
@@ -110,7 +110,7 @@ void can_transmit_raw(can_message_raw *msg);
  * Receiving
  */
 
-can_message_raw *can_get_raw();
+can_message_raw *can_get_raw(void);
 can_message_raw *can_get_raw_nb();
 
 // this is only needed for Interrupt driven Version
@@ -136,10 +136,11 @@ void can_transmit_v2(can_message_v2 *msg);
  * Receiving
  */
 
-can_message_v2 *can_get_v2_nb();
+can_message_v2 *can_get_v2_nb(void);
 
 void can_free_v2(can_message_v2 *msg);
 
 
 
-#endif // _LIB_CAN_H
+#endif // _CAN_H
+
