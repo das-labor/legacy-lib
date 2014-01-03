@@ -4,17 +4,19 @@
 #include <errno.h>
 #include <string.h>
 #include <time.h>
+#include <syslog.h>
 
 #include "debug.h"
 
-int debug_time = 0;
-int debug_level  = 0;
-int debug_syslog = 0;
+int debug_time = NULL;
+int debug_level  = NULL;
+int debug_syslog = NULL;
+char *debug_file = NULL;
 FILE *debugFP;
 
 void print_time()
 {
-	if(debug_time == 0)
+	if (debug_time == 0)
 		return;
 
 	time_t t = time(NULL);
@@ -23,15 +25,21 @@ void print_time()
 	fprintf(debugFP, "%s - ", tbuf);
 }
 
-void debug_init(char* debugfile)
+void debug_init()
 {
-	if (debugfile) {
-		if ((debugFP = fopen(debugfile,"a")) == NULL)
+	if (debug_file)
+	{
+		if ((debugFP = fopen(debug_file,"a")) == NULL)
 		{
 			printf("Failed to open Debuglogfile\n");
 			exit(EXIT_FAILURE);
 		}
 		debug_time = 1;
+	}
+	else if (debug_syslog)
+	{
+		openlog("cand", LOG_CONS | LOG_PID | LOG_NDELAY, 0);
+		
 	}
 	else
 		debugFP = stderr;
@@ -44,9 +52,11 @@ void debug_close()
 		fflush(debugFP);
 		fclose(debugFP);
 	}
+	if (debug_syslog)
+		closelog();
 }
 
-void debug( int level, char *format, ... )
+void debug(int level, char *format, ...)
 {
 	va_list ap;
 
@@ -63,7 +73,7 @@ void debug( int level, char *format, ... )
 	va_end(ap);
 }
 
-void debug_perror( int level, char *format, ... )
+void debug_perror(int level, char *format, ...)
 {
 	va_list ap;
 
@@ -83,7 +93,7 @@ void debug_perror( int level, char *format, ... )
 	va_end(ap);
 }
 
-void debug_assert( int test, char *format, ... )
+void debug_assert(int test, char *format, ...)
 {
 	if (test)
 		return;
