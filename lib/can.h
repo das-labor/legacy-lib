@@ -28,7 +28,7 @@ typedef struct
 	uint8_t data[8];
 } can_message_raw;
 
-typedef struct{
+typedef struct {
 	can_addr      addr_src;
 	can_addr      addr_dst;
 	can_port      port_src;
@@ -87,7 +87,7 @@ void can_transmit(can_message *msg);
 
 can_message *can_get(void);
 can_message *can_get_nb(void);
-void can_free(can_message * msg);
+void can_free(can_message *msg);
 
 // this is only needed for Interrupt driven Version
 #ifndef CAN_INTERRUPT
@@ -111,7 +111,7 @@ void can_transmit_raw(can_message_raw *msg);
  */
 
 can_message_raw *can_get_raw(void);
-can_message_raw *can_get_raw_nb();
+can_message_raw *can_get_raw_nb(void);
 
 // this is only needed for Interrupt driven Version
 #ifndef CAN_INTERRUPT
