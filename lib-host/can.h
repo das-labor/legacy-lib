@@ -76,6 +76,10 @@ void can_setled(unsigned char led, unsigned char state);
 can_message *can_buffer_get(void);
 void can_transmit(can_message *msg);
 
+#ifdef POSIX
+	void can_transmit_raw_gateway_message(rs232can_msg *rmsg);
+#endif
+
 
 /*****************************************************************************
  * Receiving
@@ -117,8 +121,9 @@ can_message_raw *can_get_raw_nb(void);
   void can_free_raw(can_message_raw *msg);
 #endif
 
-
-
+#ifdef POSIX
+	can_get_raw_gateway_message_nb
+#endif
 
 /*****************************************************************************
  * Sending
@@ -138,3 +143,4 @@ void can_free_v2(can_message_v2 *msg);
 
 
 #endif // _CAN_H
+
