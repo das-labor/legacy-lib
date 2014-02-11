@@ -16,9 +16,11 @@
 
 int uart_fd;
 
+struct termios old_options;
+
 unsigned int baud_to_value(speed_t baud)
 {
-	 switch (baud) {
+	switch (baud) {
 		case B0:      return 0;
 		case B50:     return 50;
 		case B75: return 75;
@@ -51,9 +53,9 @@ unsigned int baud_to_value(speed_t baud)
 		case B3500000: return 3500000;
 		case B4000000: return 4000000;
 		default: break;
-     }
-     
-     return 0;
+	}
+
+	return 0;
 }
 
 
@@ -67,33 +69,29 @@ void uart_init(char *sport) {
 	 *
 	 * O_NDELAY -- don't block for DTR, we're not talking to a modem
 	 */
-	uart_fd = open(sport, O_RDWR | O_NOCTTY | O_NDELAY);
-	if (uart_fd == -1) {
+	uart_fd = open(sport, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
+	if (uart_fd < 0) {
 		debug_perror(0, "Error opening serial port %s", sport);
 		exit(EXIT_FAILURE);
 	}
 
-	// set some options on socket
-	fcntl(uart_fd, F_SETFL, O_NONBLOCK);
-
-	// set serial options
-	tcgetattr(uart_fd, &options);
+	// get serial options
+	tcgetattr(uart_fd, &old_options);
+	// clear struct
+	bzero(&options, sizeof(options));
 
 	//both needed because cfsetspeed is not available on Windows.
 	cfsetispeed(&options, UART_BAUD_RATE);
 	cfsetospeed(&options, UART_BAUD_RATE);
 
 
-	options.c_cflag &= ~(PARENB | CSTOPB | CSIZE);
 	options.c_cflag |= (CS8 | CLOCAL | CREAD);
-
-	options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-
-	options.c_iflag &= ~(INPCK | PARMRK | BRKINT | INLCR | ICRNL | IUCLC | IXANY);
 	options.c_iflag |= IGNBRK;
-
-	options.c_oflag &= ~(OPOST | ONLCR);
-
+	options.c_lflag = 0;
+	options.c_cc[VTIME]    = 0;   /* inter-character timer unused */
+	options.c_cc[VMIN]     = 0;   /* blocking read until 5 chars received */
+	cfmakeraw(&options);
+	tcflush(uart_fd, TCIFLUSH);
 	rc = tcsetattr(uart_fd, TCSANOW, &options);
 
 	if (rc == -1) {
@@ -107,6 +105,7 @@ void uart_init(char *sport) {
 
 void uart_close() {
 	close(uart_fd);
+	tcsetattr(uart_fd, TCSANOW, &old_options);
 }
 
 void uart_putc(char c) {
@@ -130,9 +129,10 @@ unsigned char uart_getc_nb(char *c)
 
 	ret = read(uart_fd, c, 1);
 
-	debug(10, "uart char: %d\n", c);
-	if (ret<=0) return 0;
-
+	if (ret <= 0) {
+		debug(10, "uart char: %d\n", c);
+		return 0;
+	}
 	return 1;
 }
 
@@ -145,7 +145,7 @@ char uart_getc(void)
 	FD_ZERO(&rset);
 	FD_SET(uart_fd, &rset);
 
-	ret = select(uart_fd + 1, &rset, (fd_set*)NULL, (fd_set*)NULL, NULL);
+	ret = select(uart_fd + 1, &rset, (fd_set *) NULL, (fd_set *) NULL, NULL);
 	debug_assert(ret >= 0, "uart-host.c: select failed");
 
 	uart_getc_nb(&c);

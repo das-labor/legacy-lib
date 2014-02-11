@@ -83,12 +83,12 @@ void cann_listen(char *port)
 	   Try each address until we successfully bind(2).
 	   If socket(2) (or bind(2)) fails, we (close the socket
 	   and) try the next address. */
-	   
+
 	for (rp = result; rp != NULL; rp = rp->ai_next) {
 		sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
 		if (sfd == -1)
 			continue;
-			
+
 		debug(5, "Trying to bind to %s (%s)",
 			get_ip_str((struct sockaddr *)rp->ai_addr,
 			buf, sizeof(buf)),
@@ -98,17 +98,17 @@ void cann_listen(char *port)
 		
 		//set reuseaddr	to avoid address in use (b/c if close_wait) when restarting
 		ret = setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
-	
+
 		//make this a dual-stack socket in windows
 #if defined(_WIN32)
 		ret = setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
 #endif
 
 		if (ret != 0) debug_perror(0, "Could not set socket options: ");
-		
+
 		if (bind(sfd, rp->ai_addr, rp->ai_addrlen) == 0)
 			break;                  /* Success */
-			
+
 		debug_perror(0, "Could not bind to %s.", get_ip_str((struct sockaddr *)rp->ai_addr, buf, sizeof(buf)));
 		close(sfd);
 	}

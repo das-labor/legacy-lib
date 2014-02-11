@@ -39,6 +39,11 @@ void canu_reset()
 		uart_putc((char) 0x00);
 }
 
+void canu_close()
+{
+	uart_close();
+}
+
 /*****************************************************************************
  * Memory Management
  */
@@ -65,7 +70,7 @@ rs232can_msg *canu_get_nb()
 	static unsigned int crc;
 	unsigned char c;
 
-	while (uart_getc_nb(&c))
+	while (uart_getc_nb((char *) &c))
 	{
 		debug(10, "canu_get_nb received: %02x\n", c);
 		switch (canu_rcvstate)

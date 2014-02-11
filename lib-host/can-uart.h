@@ -23,13 +23,14 @@ extern unsigned int canu_failcnt;
 void canu_init(char *serial);
 
 // syncronize line
-void canu_reset();
+void canu_reset(void);
 
+void canu_close(void);
 
 /*****************************************************************************
  * Memory Management
  */
-rs232can_msg *canu_buffer_get();
+rs232can_msg *canu_buffer_get(void);
 void canu_free(rs232can_msg *);
 
 
@@ -38,10 +39,10 @@ void canu_free(rs232can_msg *);
  */
 
 /* nonblocking read from uart -- returns 0 if no complete msg arrived */
-rs232can_msg *canu_get_nb();
+rs232can_msg *canu_get_nb(void);
 
 /* blocking read from uart */
-rs232can_msg *canu_get();
+rs232can_msg *canu_get(void);
 
 
 /*****************************************************************************
