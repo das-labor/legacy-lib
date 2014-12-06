@@ -404,7 +404,7 @@ rs232can_msg *cann_get_nb(cann_conn_t *client)
 
 	// sanity
 	if (client->error) {
-		debug( 0, "cann_get_nb() with error %d on %d", client->error, client->fd);
+		debug( 0, "cann_get_nb() with error %d on %d", client->error, client->fd); // if client con to server breaks we get an endless high cpu loop "cann_get_nb() with error 1 on 3"
 		return NULL;
 	}
 

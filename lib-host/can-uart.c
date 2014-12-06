@@ -131,7 +131,7 @@ rs232can_msg *canu_get()
 		FD_ZERO(&rset);
 		FD_SET(uart_fd, &rset);
 
-		ret = select(uart_fd + 1, &rset, (fd_set*)NULL, (fd_set*)NULL, NULL);
+		ret = select(uart_fd + 1, &rset, (fd_set *) NULL, (fd_set *) NULL, NULL);
 		debug_assert( ret >= 0, "canu_get: select failed" );
 
 		rmsg = canu_get_nb();
@@ -146,7 +146,7 @@ rs232can_msg *canu_get()
  */
 void canu_transmit(rs232can_msg *msg)
 {
-	char *ptr = (char *)msg;
+	char *ptr = (char *) msg;
 	unsigned char i;
 	unsigned int crc = crc16(&msg->cmd, msg->len + 2);
 
