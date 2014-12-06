@@ -16,13 +16,14 @@
 
 int uart_fd;
 
-struct termios old_options;
+// keeps uart port config
+static struct termios old_options;
 
-unsigned int baud_to_value(speed_t baud)
+static unsigned int baud_to_value(speed_t baud)
 {
 	switch (baud) {
-		case B0:      return 0;
-		case B50:     return 50;
+		case B0:  return 0;
+		case B50: return 50;
 		case B75: return 75;
 		case B110: return 110;
 		case B134: return 134;
@@ -58,10 +59,63 @@ unsigned int baud_to_value(speed_t baud)
 	return 0;
 }
 
+static speed_t value_to_baud(unsigned int value)
+{
+	switch (value) {
+		case 0:		return B0;		/* hang up */
+		case 50:	return B50;
+		case 75:	return B75;
+		case 110:	return B110;
+		case 134:	return B134;
+		case 150:	return B150;
+		case 200:	return B200;
+		case 300:	return B300;
+		case 600:	return B600;
+		case 1200:	return B1200;
+		case 1800:	return B1800;
+		case 2400:	return B2400;
+		case 4800:	return B4800;
+		case 9600:	return B9600;
+		case 19200:	return B19200;
+		case 38400:	return B38400;
+		case 57600:	return B57600;
+		case 115200:	return B115200;
+		case 230400:	return B230400;
+		case 460800:	return B460800;
+		case 500000:	return B500000;
+		case 576000:	return B576000;
+		case 921600:	return B921600;
+		case 1000000:	return B1000000;
+		case 1152000:	return B1152000;
+		case 1500000:	return B1500000;
+		case 2000000:	return B2000000;
+		case 2500000:	return B2500000;
+		case 3000000:	return B3000000;
+		case 3500000:	return B3500000;
+		case 4000000:	return B4000000;
+		default:	break;
+	}
 
-void uart_init(char *sport) {
-	int rc;
+	return 0;
+}
+
+void uart_init(char *sport, char *baudrate)
+{
 	struct termios options;
+	speed_t baud;
+
+	if (baudrate) {
+		baud = value_to_baud(atoi(baudrate));
+		printf("bautrate: %s\n", baudrate);
+	}
+	else
+		baud = DEFAULT_UART_BAUD_RATE;
+	if (!baud) {
+		debug_perror(0, "invalid baudrate: %i", baud_to_value(baud));
+		exit(EXIT_FAILURE);
+	}
+	
+	int rc;
 
 	/**
 	 * O_NOCTTY -- ttyS is not our controlling terminal:
@@ -80,16 +134,15 @@ void uart_init(char *sport) {
 	// clear struct
 	bzero(&options, sizeof(options));
 
-	//both needed because cfsetspeed is not available on Windows.
-	cfsetispeed(&options, UART_BAUD_RATE);
-	cfsetospeed(&options, UART_BAUD_RATE);
-
+	// both needed because cfsetspeed is not available on Windows.
+	cfsetispeed(&options, baud);
+	cfsetospeed(&options, baud);
 
 	options.c_cflag |= (CS8 | CLOCAL | CREAD);
 	options.c_iflag |= IGNBRK;
 	options.c_lflag = 0;
-	options.c_cc[VTIME]    = 0;   /* inter-character timer unused */
-	options.c_cc[VMIN]     = 0;   /* blocking read until 5 chars received */
+	options.c_cc[VTIME] = 0; // inter-character timer unused
+	options.c_cc[VMIN]  = 0; // blocking read until 0 chars received
 	cfmakeraw(&options);
 	tcflush(uart_fd, TCIFLUSH);
 	rc = tcsetattr(uart_fd, TCSANOW, &options);
@@ -103,12 +156,14 @@ void uart_init(char *sport) {
 		debug(1, "Serial CAN communication established at %lu Baud", baud_to_value(cfgetospeed(&options)));
 }
 
-void uart_close() {
+void uart_close(void)
+{
 	close(uart_fd);
 	tcsetattr(uart_fd, TCSANOW, &old_options);
 }
 
-void uart_putc(char c) {
+void uart_putc(char c)
+{
 	ssize_t ret = write(uart_fd, &c, 1);
 	if (ret != 1)
 	{
@@ -117,7 +172,8 @@ void uart_putc(char c) {
 	}
 }
 
-void uart_putstr(char *str) {
+void uart_putstr(char *str)
+{
 	while (*str) {
 		uart_putc(*str++);
 	}

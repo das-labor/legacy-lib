@@ -42,7 +42,7 @@ typedef struct {
 } rs232can_msg;
 
 
-void can_message_raw_from_rs232can_msg(can_message_raw *cmsg, rs232can_msg *rmsg);
-void rs232can_msg_from_can_message_raw(rs232can_msg *rmsg, can_message_raw *cmsg);
+extern void can_message_raw_from_rs232can_msg(can_message_raw *cmsg, rs232can_msg *rmsg);
+extern void rs232can_msg_from_can_message_raw(rs232can_msg *rmsg, can_message_raw *cmsg);
 
 #endif

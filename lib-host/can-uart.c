@@ -14,10 +14,10 @@
 
 typedef enum {STATE_START, STATE_LEN, STATE_PAYLOAD, STATE_CRC} canu_rcvstate_t;
 
-rs232can_msg	canu_rcvpkt;
-canu_rcvstate_t	canu_rcvstate = STATE_START;
-unsigned char 	canu_rcvlen   = 0;
-unsigned int	canu_failcnt  = 0;
+static rs232can_msg	canu_rcvpkt;
+static canu_rcvstate_t	canu_rcvstate = STATE_START;
+static unsigned char 	canu_rcvlen   = 0;
+static unsigned int	canu_failcnt  = 0;
 
 
 /*****************************************************************************
@@ -25,21 +25,21 @@ unsigned int	canu_failcnt  = 0;
  */
 
 // Initialize CAN over UART on port serial
-void canu_init(char *serial)
+void canu_init(char *serial, char *baudrate)
 {
-	uart_init(serial);
+	uart_init(serial, baudrate);
 	canu_reset();
 }
 
 // synchronize line
-void canu_reset()
+void canu_reset(void)
 {
 	unsigned char i;
 	for (i = sizeof(rs232can_msg) + 2; i > 0; i--)
 		uart_putc((char) 0x00);
 }
 
-void canu_close()
+void canu_close(void)
 {
 	uart_close();
 }
@@ -48,7 +48,7 @@ void canu_close()
  * Memory Management
  */
 
-rs232can_msg *canu_buffer_get()
+rs232can_msg *canu_buffer_get(void)
 {
 	return (rs232can_msg *) malloc(sizeof(rs232can_msg));
 }
@@ -64,20 +64,17 @@ void canu_free(rs232can_msg *rmsg)
  */
 
 // Returns Message or 0 if there is no complete message.
-rs232can_msg *canu_get_nb()
+rs232can_msg *canu_get_nb(void)
 {
 	static char *uartpkt_data;
 	static unsigned int crc;
 	unsigned char c;
 
-	while (uart_getc_nb((char *) &c))
-	{
+	while (uart_getc_nb((char *) &c)) {
 		debug(10, "canu_get_nb received: %02x\n", c);
-		switch (canu_rcvstate)
-		{
+		switch (canu_rcvstate) {
 			case STATE_START:
-				if (c)
-				{
+				if (c) {
 					canu_rcvstate = STATE_LEN;
 					canu_rcvpkt.cmd = c;
 				}
@@ -86,8 +83,7 @@ rs232can_msg *canu_get_nb()
 				break;
 			case STATE_LEN:
 				canu_rcvlen = c;
-				if (canu_rcvlen > RS232CAN_MAXLENGTH)
-				{
+				if (canu_rcvlen > RS232CAN_MAXLENGTH) {
 					canu_rcvstate = STATE_START;
 					break;
 				}
@@ -98,8 +94,7 @@ rs232can_msg *canu_get_nb()
 			case STATE_PAYLOAD:
 				if (canu_rcvlen--)
 					*(uartpkt_data++) = c;
-				else
-				{
+				else {
 					canu_rcvstate = STATE_CRC;
 					crc = c;
 				}
@@ -109,8 +104,7 @@ rs232can_msg *canu_get_nb()
 				crc = (crc << 8) | c;
 
 				debug(10, "canu_get_nb crc: 0x%04x, 0x%04x\n", crc, crc16(&canu_rcvpkt.cmd, canu_rcvpkt.len + 2));
-				if (crc == crc16(&canu_rcvpkt.cmd, canu_rcvpkt.len + 2))
-				{
+				if (crc == crc16(&canu_rcvpkt.cmd, canu_rcvpkt.len + 2)) {
 					canu_failcnt = 0;
 					return &canu_rcvpkt;
 				}
@@ -121,7 +115,7 @@ rs232can_msg *canu_get_nb()
 	return NULL;
 }
 
-rs232can_msg *canu_get()
+rs232can_msg *canu_get(void)
 {
 	int ret;
 	fd_set rset;
@@ -150,9 +144,8 @@ void canu_transmit(rs232can_msg *msg)
 	unsigned char i;
 	unsigned int crc = crc16(&msg->cmd, msg->len + 2);
 
-	for (i = 0; i < msg->len + 2; i++) {
+	for (i = 0; i < msg->len + 2; i++)
 		uart_putc(*ptr++);
-	}
 
 	uart_putc(crc >> 8);
 	uart_putc(crc & 0xFF);

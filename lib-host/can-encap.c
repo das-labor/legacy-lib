@@ -4,7 +4,7 @@
 
 void can_message_raw_from_rs232can_msg(can_message_raw *cmsg, rs232can_msg *rmsg)
 {
-	memcpy(cmsg, rmsg->data, sizeof(can_message_raw) );
+	memcpy(cmsg, rmsg->data, sizeof(can_message_raw));
 }
 
 
