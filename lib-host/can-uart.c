@@ -17,7 +17,7 @@ typedef enum {STATE_START, STATE_LEN, STATE_PAYLOAD, STATE_CRC} canu_rcvstate_t;
 static rs232can_msg	canu_rcvpkt;
 static canu_rcvstate_t	canu_rcvstate = STATE_START;
 static unsigned char 	canu_rcvlen   = 0;
-static unsigned int	canu_failcnt  = 0;
+unsigned int	canu_failcnt  = 0;
 
 
 /*****************************************************************************
